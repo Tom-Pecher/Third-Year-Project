@@ -13,3 +13,6 @@ class TestEnv():
     def step(self, action:int) -> tuple:
         return self.env.step(action)
     
+    def close(self) -> None:
+        self.env.close()
+    

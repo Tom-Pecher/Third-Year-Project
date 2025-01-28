@@ -8,8 +8,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import warnings
+from pathlib import Path
 
-from envs.test_env import TestEnv
 from utils.DQN import DQN
 from utils.replay_memory import ReplayMemory
 from utils.transition import Transition
@@ -41,6 +41,7 @@ class DQNAgent:
         state, _ = self.env.reset()
         n_observations = len(state)
         n_actions = self.env.action_space.n
+        self.env.close()
         
         self.policy_net = DQN(n_observations, n_actions).to(device)
         self.target_net = DQN(n_observations, n_actions).to(device)
@@ -84,7 +85,7 @@ class DQNAgent:
         torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
         self.optimizer.step()
         
-    def train(self, num_episodes:int=600) -> None:
+    def train(self, num_episodes:int=100) -> None:
         for episode in range(num_episodes):
             state, _ = self.env.reset()
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
@@ -112,4 +113,29 @@ class DQNAgent:
                 if done:
                     print(f"Episode {episode} - Steps: {steps}")
                     break
-    
+        
+        self.env.close()
+
+    def save(self, filename:str, path="src/saved") -> None:
+        torch.save(self.policy_net.state_dict(), Path(path) / filename)
+
+    def load(self, filename:str, path="src/saved") -> None:
+        self.policy_net.load_state_dict(torch.load(Path(path) / filename))
+
+    def run(self, num_episodes:int=10) -> None:
+        for episode in range(num_episodes):
+            state, _ = self.env.reset()
+            state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+            steps = 0
+            
+            while True:
+                action = self.policy_net(state).max(1)[1].view(1, 1)
+                observation, reward, terminated, truncated, _ = self.env.step(action.item())
+                state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
+                
+                steps += 1
+                if terminated or truncated:
+                    print(f"Episode {episode} - Steps: {steps}")
+                    break
+        
+        self.env.close()
