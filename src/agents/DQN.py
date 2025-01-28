@@ -1,65 +1,25 @@
 
 # This iteration of DQN is a simple initial framework based off of the PyTorch DQN intermediate tutorial (see here: https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html).
 
-import gym
 import math
 import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from collections import deque, namedtuple
 import warnings
+
+from envs.test_env import TestEnv
+from utils.DQN import DQN
+from utils.replay_memory import ReplayMemory
+from utils.transition import Transition
 
 warnings.filterwarnings("ignore", category=DeprecationWarning, message="`np.bool8` is a deprecated alias for `np.bool_`")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
-
-
-class Env():
-    def __init__(self, env_name:str="CartPole-v1") -> None:
-        self.env = gym.make(env_name)
-        self.action_space = self.env.action_space
-        self.observation_space = self.env.observation_space
-        
-    def reset(self) -> tuple:
-        return self.env.reset()
-    
-    def step(self, action:int) -> tuple:
-        return self.env.step(action)
-
-
-class ReplayMemory:
-    def __init__(self, capacity:int) -> None:
-        self.memory = deque(maxlen=capacity)
-        
-    def push(self, *args:tuple) -> None:
-        self.memory.append(Transition(*args))
-        
-    def sample(self, batch_size:int) -> list:
-        return random.sample(self.memory, batch_size)
-    
-    def __len__(self) -> int:
-        return len(self.memory)
-
-
-class DQN(nn.Module):
-    def __init__(self, input_size:int, output_size:int) -> None:
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(input_size, 128),
-            nn.ReLU(),
-            nn.Linear(128, 128),
-            nn.ReLU(),
-            nn.Linear(128, output_size)
-        )
-
-    def forward(self, x:torch.Tensor) -> torch.Tensor:
-        return self.net(x)
 
 
 class DQNAgent:
-    def __init__(self, env:Env,
+    def __init__(self, env,
                     batch_size:int  = 128,
                     gamma:float     = 0.99,
                     eps_start:float = 0.9,
@@ -152,9 +112,4 @@ class DQNAgent:
                 if done:
                     print(f"Episode {episode} - Steps: {steps}")
                     break
-
-if __name__ == "__main__":
-    env = Env()
-    agent = DQNAgent(env)
-    agent.train()
     
