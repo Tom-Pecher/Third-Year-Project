@@ -16,3 +16,5 @@ class TestEnv():
     def close(self) -> None:
         self.env.close()
     
+if __name__ == "__main__":
+    pass
