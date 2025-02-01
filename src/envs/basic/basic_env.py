@@ -23,7 +23,7 @@ class BasicTrafficEnv():
             traci.load(["-c", self.config_path])
         else:
             self.sumoBinary = sumolib.checkBinary('sumo-gui' if sumo_gui else 'sumo')
-            traci.start([self.sumoBinary, "-c", self.config_path, "--tripinfo-output", "sumo_log.txt"])
+            traci.start([self.sumoBinary, "-c", self.config_path, "--tripinfo-output", "envs/basic/sumo_output/sumo_log.txt"])
         return self.get_state()
     
     def step(self, action:int) -> tuple:

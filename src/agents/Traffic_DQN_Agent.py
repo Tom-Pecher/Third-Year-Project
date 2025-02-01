@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import wandb
 import warnings
 from pathlib import Path
 
@@ -37,6 +38,16 @@ class DQNAgent:
         self.eps_decay  = eps_decay
         self.tau        = tau
         self.lr         = lr
+
+        wandb.init(project="DQN-Training", config={
+            "batch_size": batch_size,
+            "gamma": gamma,
+            "eps_start": eps_start,
+            "eps_end": eps_end,
+            "eps_decay": eps_decay,
+            "tau": tau,
+            "lr": lr
+        })
         
         n_observations = len(self.env.observation_space)
         n_actions = len(self.env.action_space)
@@ -89,11 +100,13 @@ class DQNAgent:
             state = self.env.reset(sumo_gui)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             steps = 0
+            total_reward = 0
             
             while True:
                 action = self.select_action(state)
                 observation, reward, terminated = self.env.step(action)
                 reward = torch.tensor([reward], device=device)
+                total_reward += reward.item()
                 
                 next_state = None if terminated else torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
                 self.memory.push(state, action, next_state, reward)
@@ -110,12 +123,17 @@ class DQNAgent:
                 steps += 1
                 if terminated:
                     print(f"Episode {episode} - Steps: {steps}")
+                    wandb.log({"episode": episode, "reward": total_reward, "steps": steps})
                     break
                 
         self.env.close()
+        self.save("DQN_300.pth")
+        wandb.finish()
 
     def save(self, filename:str, path="saved") -> None:
-        torch.save(self.policy_net.state_dict(), Path(path) / filename)
+        save_path = Path(path) / filename
+        torch.save(self.policy_net.state_dict(), save_path)
+        wandb.save(str(save_path))
 
     def load(self, filename:str, path="saved") -> None:
         self.policy_net.load_state_dict(torch.load(Path(path) / filename, weights_only=True))
