@@ -4,4 +4,7 @@
         <net-file value="basic.net.xml"/>
         <route-files value="basic.rou.xml"/>
     </input>
+    <report>
+        <no-step-log value="true"/>
+    </report>
 </configuration>

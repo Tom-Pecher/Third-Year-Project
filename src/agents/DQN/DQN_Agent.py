@@ -11,7 +11,7 @@ import wandb
 import warnings
 from pathlib import Path
 
-from utils.DQN import DQN
+from utils.NN import NN
 from utils.replay_memory import ReplayMemory
 from utils.transition import Transition
 
@@ -25,7 +25,7 @@ class DQNAgent:
                     gamma:float     = 0.99,
                     eps_start:float = 0.9,
                     eps_end:float   = 0.05,
-                    eps_decay:int   = 1000,
+                    eps_decay:int   = 10000,
                     tau:float       = 0.005,
                     lr:float        = 1e-4
                 ) -> None:
@@ -36,6 +36,7 @@ class DQNAgent:
         self.eps_start  = eps_start
         self.eps_end    = eps_end
         self.eps_decay  = eps_decay
+        self.eps        = 0
         self.tau        = tau
         self.lr         = lr
 
@@ -52,18 +53,18 @@ class DQNAgent:
         n_observations = len(self.env.observation_space)
         n_actions = len(self.env.action_space)
         
-        self.policy_net = DQN(n_observations, n_actions).to(device)
-        self.target_net = DQN(n_observations, n_actions).to(device)
+        self.policy_net = NN(n_observations, n_actions).to(device)
+        self.target_net = NN(n_observations, n_actions).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.lr, amsgrad=True)
-        self.memory = ReplayMemory(10000)
+        self.memory = ReplayMemory(100000)
         self.steps_done = 0
         
     def select_action(self, state:torch.Tensor) -> torch.Tensor:
-        eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
+        self.eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
         self.steps_done += 1
-        if random.random() > eps:
+        if random.random() > self.eps:
             with torch.no_grad():
                 output = self.policy_net(state).argmax(1).unsqueeze(0)
                 return output
@@ -122,12 +123,14 @@ class DQNAgent:
                 
                 steps += 1
                 if terminated:
-                    print(f"Episode {episode} - Steps: {steps}")
+                    print(f"Episode {episode} - Steps: {steps} - Epsilon: {self.eps}")
                     wandb.log({"episode": episode, "reward": total_reward, "steps": steps})
+
+                    if episode % 100 == 0:
+                        self.save(f"DQN_{episode}.pth")
                     break
                 
         self.env.close()
-        self.save("DQN_300.pth")
         wandb.finish()
 
     def save(self, filename:str, path="saved") -> None:
