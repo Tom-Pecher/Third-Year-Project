@@ -6,7 +6,7 @@ if __name__ == "__main__":
     env = BasicTrafficEnv("envs/basic/sumo/basic.sumocfg")
 
     agent1 = DQNAgent(env)
-    agent1.train(1000)
+    agent1.train(100)
 
     # agent2 = DQNAgent(env)
     # agent2.load("DQN_300.pth")

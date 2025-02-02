@@ -41,13 +41,13 @@ class DQNAgent:
         self.lr         = lr
 
         wandb.init(project="DQN-Training", config={
-            "batch_size": batch_size,
-            "gamma": gamma,
-            "eps_start": eps_start,
-            "eps_end": eps_end,
-            "eps_decay": eps_decay,
-            "tau": tau,
-            "lr": lr
+            "batch_size" : batch_size,
+            "gamma"      : gamma,
+            "eps_start"  : eps_start,
+            "eps_end"    : eps_end,
+            "eps_decay"  : eps_decay,
+            "tau"        : tau,
+            "lr"         : lr
         })
         
         n_observations = len(self.env.observation_space)
@@ -97,7 +97,8 @@ class DQNAgent:
         self.optimizer.step()
         
     def train(self, num_episodes:int=100, sumo_gui=False) -> None:
-        for episode in range(num_episodes):
+        for episode in range(num_episodes + 1):
+            log = (episode % 100 == 0)
             state = self.env.reset(sumo_gui)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             steps = 0
@@ -126,19 +127,18 @@ class DQNAgent:
                     print(f"Episode {episode} - Steps: {steps} - Epsilon: {self.eps}")
                     wandb.log({"episode": episode, "reward": total_reward, "steps": steps})
 
-                    if episode % 100 == 0:
+                    if log:
                         self.save(f"DQN_{episode}.pth")
                     break
                 
         self.env.close()
         wandb.finish()
 
-    def save(self, filename:str, path="saved") -> None:
+    def save(self, filename:str, path="saved/models") -> None:
         save_path = Path(path) / filename
         torch.save(self.policy_net.state_dict(), save_path)
-        wandb.save(str(save_path))
 
-    def load(self, filename:str, path="saved") -> None:
+    def load(self, filename:str, path="saved/models") -> None:
         self.policy_net.load_state_dict(torch.load(Path(path) / filename, weights_only=True))
 
     def run(self, num_episodes:int=10, sumo_gui=False) -> None:
