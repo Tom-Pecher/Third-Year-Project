@@ -27,7 +27,8 @@ class DQNAgent:
                     eps_end:float   = 0.05,
                     eps_decay:int   = 10000,
                     tau:float       = 0.005,
-                    lr:float        = 1e-4
+                    lr:float        = 1e-4,
+                    wandb_on:bool      = False
                 ) -> None:
         
         self.env        = env
@@ -39,16 +40,18 @@ class DQNAgent:
         self.eps        = 0
         self.tau        = tau
         self.lr         = lr
+        self.wandb_on   = wandb_on
 
-        wandb.init(project="DQN-Training", config={
-            "batch_size" : batch_size,
-            "gamma"      : gamma,
-            "eps_start"  : eps_start,
-            "eps_end"    : eps_end,
-            "eps_decay"  : eps_decay,
-            "tau"        : tau,
-            "lr"         : lr
-        })
+        if wandb_on:
+            wandb.init(project="DQN-Training", config={
+                "batch_size" : batch_size,
+                "gamma"      : gamma,
+                "eps_start"  : eps_start,
+                "eps_end"    : eps_end,
+                "eps_decay"  : eps_decay,
+                "tau"        : tau,
+                "lr"         : lr
+            })
         
         n_observations = len(self.env.observation_space)
         n_actions = len(self.env.action_space)
@@ -125,14 +128,16 @@ class DQNAgent:
                 steps += 1
                 if terminated:
                     print(f"Episode {episode} - Steps: {steps} - Epsilon: {self.eps}")
-                    wandb.log({"episode": episode, "reward": total_reward, "steps": steps})
+                    if self.wandb_on:
+                        wandb.log({"episode": episode, "reward": total_reward, "steps": steps})
 
                     if log:
                         self.save(f"DQN_{episode}.pth")
                     break
                 
         self.env.close()
-        wandb.finish()
+        if self.wandb_on:
+            wandb.finish()
 
     def save(self, filename:str, path="saved/models") -> None:
         save_path = Path(path) / filename
