@@ -100,6 +100,7 @@ class DQNAgent:
         self.optimizer.step()
         
     def train(self, num_episodes:int=100, sumo_gui=False) -> None:
+        rewards = []
         for episode in range(num_episodes + 1):
             log = (episode % 100 == 0)
             state = self.env.reset(sumo_gui)
@@ -127,9 +128,10 @@ class DQNAgent:
                 
                 steps += 1
                 if terminated:
+                    rewards.append(total_reward)
                     print(f"Episode {episode} - Steps: {steps} - Epsilon: {self.eps}")
                     if self.wandb_on:
-                        wandb.log({"episode": episode, "reward": total_reward, "steps": steps})
+                        wandb.log({"episode": episode, "reward": total_reward, "steps": steps, "rolling_average": sum(rewards[-100:])/100 if len(rewards) >= 100 else None})
 
                     if log:
                         self.save(f"DQN_{episode}.pth")
