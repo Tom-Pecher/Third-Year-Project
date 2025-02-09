@@ -1,13 +1,13 @@
 
-from envs.basic_random.basic_random_env import BasicRandomTrafficEnv
+from envs.basic_sanity.basic_sanity_env import BasicSanityTrafficEnv
 from agents.DQN.DQN_Agent import DQNAgent
 
 if __name__ == "__main__":
-    env = BasicRandomTrafficEnv("envs/basic_random/sumo/basic_random.sumocfg")
+    env = BasicSanityTrafficEnv("envs/basic_sanity/sumo/basic_sanity.sumocfg")
 
     agent1 = DQNAgent(env, wandb_on=True)
-    agent1.train(10000)
+    agent1.train(300)
 
-    # agent2 = DQNAgent(env)
-    # agent2.load("DQN_100.pth")
-    # agent2.run(1, sumo_gui=True)
+    agent2 = DQNAgent(env)
+    agent2.load("DQN_300.pth")
+    agent2.run(1, sumo_gui=True)
