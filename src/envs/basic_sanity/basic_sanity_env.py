@@ -10,6 +10,7 @@ class BasicSanityTrafficEnv():
         self.observation_space = [[-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [0.0, 30.0]]
         self.time_step = 0
         self.last_switch = 0
+        self.vehicle_waiting_times = {}
 
     def get_state(self) -> list:
         state = [traci.vehicle.getPosition(veh_id)[1] for veh_id in traci.vehicle.getIDList() if traci.vehicle.getPosition(veh_id)[0] > -5]
@@ -22,6 +23,9 @@ class BasicSanityTrafficEnv():
         return state
         
     def reset(self, sumo_gui:bool=False) -> tuple:
+        self.time_step = 0
+        self.last_switch = 0
+        self.vehicle_waiting_times = {}
         if traci.isLoaded():
             traci.load(["-c", self.config_path])
         else:
@@ -42,17 +46,30 @@ class BasicSanityTrafficEnv():
         else:
             pass
             # raise ValueError("Invalid action")
-
-        reward = -sum((traci.vehicle.getWaitingTime(veh_id) for veh_id in traci.vehicle.getIDList()))
-        if self.time_step - self.last_switch < 8:
-            reward -= 200
         terminated = traci.simulation.getMinExpectedNumber() <= 0
 
+        reward = 0
         state = self.get_state()
         if terminated:
             reward += 1000
 
-        return state, reward, terminated
+        for veh_id in traci.vehicle.getIDList():
+            waiting_time = traci.vehicle.getWaitingTime(veh_id)
+            if veh_id not in self.vehicle_waiting_times:
+                self.vehicle_waiting_times[veh_id] = waiting_time
+            else:
+                if waiting_time > self.vehicle_waiting_times[veh_id]:
+                    self.vehicle_waiting_times[veh_id] = waiting_time
+
+        total_waiting_time = sum(self.vehicle_waiting_times.values())
+
+        reward -= sum((traci.vehicle.getWaitingTime(veh_id) for veh_id in traci.vehicle.getIDList()))
+        if self.time_step - self.last_switch < 8:
+            reward -= 100
+
+        # reward -= total_waiting_time
+
+        return state, reward, terminated, total_waiting_time
     
     def close(self) -> None:
         traci.close()
