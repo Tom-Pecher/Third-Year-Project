@@ -8,7 +8,8 @@ class BasicRandomTrafficEnv():
     def __init__(self, config_path:str = "sumo/basic.sumocfg") -> None:
         self.config_path = config_path
         self.action_space = ((0, 1), (1, 0))
-        self.observation_space = [[50.0, 0.0], [-50.0, 0.0]]
+        self.observation_space = [[-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0]]
+        self.vehicle_waiting_times = {}
 
     def generate_routefile(self) -> None:
         with open("envs/basic_random/sumo/basic_random.rou.xml", "w") as routes:
@@ -27,14 +28,15 @@ class BasicRandomTrafficEnv():
 
     def get_state(self) -> list:
         state = [traci.vehicle.getPosition(veh_id)[1] for veh_id in traci.vehicle.getIDList() if traci.vehicle.getPosition(veh_id)[0] > -5]
-        if len(state) > 2:
-            state = state[:2]
+        if len(state) > 6:
+            state = state[:6]
         else:
-            while len(state) < 2:
+            while len(state) < 6:
                 state.append(0.0)
         return state
         
     def reset(self, sumo_gui:bool=False) -> tuple:
+        self.vehicle_waiting_times = {}
         self.generate_routefile()
         if traci.isLoaded():
             traci.load(["-c", self.config_path])
@@ -59,7 +61,17 @@ class BasicRandomTrafficEnv():
         if terminated:
             reward += 1000
 
-        return state, reward, terminated
+        for veh_id in traci.vehicle.getIDList():
+            waiting_time = traci.vehicle.getWaitingTime(veh_id)
+            if veh_id not in self.vehicle_waiting_times:
+                self.vehicle_waiting_times[veh_id] = waiting_time
+            else:
+                if waiting_time > self.vehicle_waiting_times[veh_id]:
+                    self.vehicle_waiting_times[veh_id] = waiting_time
+
+        total_waiting_time = sum(self.vehicle_waiting_times.values())
+
+        return state, reward, terminated, total_waiting_time
     
     def close(self) -> None:
         traci.close()

@@ -15,7 +15,7 @@ class FixedDurationAgent:
             action = 0
             self.env.reset(sumo_gui)
             while True:
-                if self.steps_done % 10 == 0:
+                if self.steps_done % 25 == 0:
                     action = self.select_action()
                 _, _, terminated, total_waiting_time = self.env.step(action)
                 
