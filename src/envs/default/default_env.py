@@ -12,6 +12,8 @@ class DefaultTrafficEnv():
         self.last_switch = 0
         self.vehicle_waiting_times = {}
 
+        self.queue_lengths = {'E5': [], 'E6': []} 
+
     def get_state(self) -> list:
         state = [traci.vehicle.getPosition(veh_id)[1] for veh_id in traci.vehicle.getIDList() if traci.vehicle.getPosition(veh_id)[0] > -5]
         if len(state) > 6:
@@ -25,6 +27,7 @@ class DefaultTrafficEnv():
     def reset(self, sumo_gui:bool=False) -> tuple:
         self.last_switch = 0
         self.vehicle_waiting_times = {}
+        self.queue_lengths = {'E5': [], 'E6': []}
         if traci.isLoaded():
             traci.load(["-c", self.config_path])
         else:
@@ -36,6 +39,10 @@ class DefaultTrafficEnv():
         old_signal = traci.trafficlight.getRedYellowGreenState("J4")
 
         traci.simulationStep()
+
+        self.queue_lengths['E5'].append(self.get_queue_length('E5'))
+        self.queue_lengths['E6'].append(self.get_queue_length('E6'))
+
         if action == 1:
             traci.trafficlight.setRedYellowGreenState("J4", "rG")
         elif action == 0:
@@ -68,11 +75,27 @@ class DefaultTrafficEnv():
                     self.vehicle_waiting_times[veh_id] = waiting_time
 
         total_waiting_time = sum(self.vehicle_waiting_times.values())
+        avg_queues = self.get_average_queue_lengths()
 
-        return state, reward, terminated, total_waiting_time
+        return state, reward, terminated, total_waiting_time, avg_queues['E5'], avg_queues['E6']
     
     def close(self) -> None:
         traci.close()
+
+    def get_queue_length(self, edge_id:str) -> int:
+        """Calculate number of vehicles waiting (speed < 0.1 m/s) on an edge"""
+        queue_length = 0
+        for veh_id in traci.edge.getLastStepVehicleIDs(edge_id):
+            if traci.vehicle.getSpeed(veh_id) < 0.1:
+                queue_length += 1
+        return queue_length
+    
+    def get_average_queue_lengths(self) -> dict:
+        """Calculate average queue lengths for the entire episode"""
+        return {
+            'E5': sum(self.queue_lengths['E5']) / len(self.queue_lengths['E5']) if self.queue_lengths['E5'] else 0,
+            'E6': sum(self.queue_lengths['E6']) / len(self.queue_lengths['E6']) if self.queue_lengths['E6'] else 0
+        }
      
     
 if __name__ == "__main__":

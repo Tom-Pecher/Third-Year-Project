@@ -25,16 +25,8 @@ class RandomTrafficEnv(DefaultTrafficEnv):
             routes.write("</routes>")
         
     def reset(self, sumo_gui:bool=False) -> tuple:
-        self.time_step = 0
-        self.last_switch = 0
-        self.vehicle_waiting_times = {}
         self.generate_routefile()
-        if traci.isLoaded():
-            traci.load(["-c", self.config_path])
-        else:
-            self.sumoBinary = sumolib.checkBinary('sumo-gui' if sumo_gui else 'sumo')
-            traci.start([self.sumoBinary, "-c", self.config_path, "--tripinfo-output", "envs/random/sumo_output/sumo_log.xml"])
-        return self.get_state()
+        return super().reset(sumo_gui)
    
 if __name__ == "__main__":
     pass
