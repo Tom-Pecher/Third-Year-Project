@@ -19,6 +19,8 @@ class DefaultTrafficEnv():
         self.stderr_capture = io.StringIO()
         sys.stderr = self.stderr_capture
 
+        self.time_loss = 0
+
     def get_state(self) -> list:
         state = [traci.vehicle.getPosition(veh_id)[1] for veh_id in traci.vehicle.getIDList() if traci.vehicle.getPosition(veh_id)[0] > -5]
         if len(state) > 6:
@@ -30,6 +32,7 @@ class DefaultTrafficEnv():
         return state
         
     def reset(self, sumo_gui:bool=False) -> tuple:
+        self.time_loss = 0
         self.emergency_brakes = 0
         self.last_switch = 0
         self.vehicle_waiting_times = {}
@@ -85,15 +88,15 @@ class DefaultTrafficEnv():
                     self.vehicle_waiting_times[veh_id] = waiting_time
 
         self.check_emergency_brakes()
-
-        total_waiting_time = sum(self.vehicle_waiting_times.values())
+        self.get_time_loss()
         avg_queues = self.get_average_queue_lengths()
 
         episode_info = {
-            'total_waiting_time': total_waiting_time,
+            'total_waiting_time': sum(self.vehicle_waiting_times.values()),
             'avg_queue_E5': avg_queues['E5'],
             'avg_queue_E6': avg_queues['E6'],
-            'emergency_brakes': self.emergency_brakes
+            'emergency_brakes': self.emergency_brakes,
+            'time_loss': self.time_loss
         }
 
         return state, reward, terminated, episode_info
@@ -124,6 +127,9 @@ class DefaultTrafficEnv():
             acceleration = traci.vehicle.getAcceleration(veh_id)
             if acceleration <= -8:  # Threshold for emergency braking (m/s²)
                 self.emergency_brakes += 1
+
+    def get_time_loss(self) -> float:
+        self.time_loss += sum([traci.vehicle.getTimeLoss(veh_id) for veh_id in traci.vehicle.getIDList()])
     
     
 if __name__ == "__main__":

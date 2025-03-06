@@ -130,7 +130,7 @@ class DQNAgent:
                 if terminated:
                     rewards.append(total_reward)
                     # print(f"Episode {episode} - Steps: {steps} - Epsilon: {self.eps}")
-                    print(f"Episode: {episode} - Steps: {steps} - TWT: {episode_info['total_waiting_time']}")
+                    print(f"Episode {episode} - Steps: {steps} - Time Loss: {episode_info['time_loss']}")
                     if self.wandb_on:
                         wandb.log({
                             "episode": episode, 
@@ -139,7 +139,9 @@ class DQNAgent:
                             "TWT": episode_info['total_waiting_time'], 
                             "rolling average": sum(rewards[-100:])/100 if len(rewards) >= 100 else None,
                             "AQL North": episode_info['avg_queue_E5'],
-                            "AQL South": episode_info['avg_queue_E6']
+                            "AQL South": episode_info['avg_queue_E6'],
+                            "Emergency Brakes": episode_info['emergency_brakes'],
+                            "Time Loss": episode_info['time_loss']
                         })
 
                     if log:
@@ -165,12 +167,12 @@ class DQNAgent:
             
             while True:
                 action = self.policy_net(state).max(1)[1].view(1, 1)
-                observation, _, terminated, total_waiting_time, _ = self.env.step(action.item())
+                observation, _, terminated, episode_info = self.env.step(action.item())
                 state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
                 
                 steps += 1
                 if terminated:
-                    print(f"Episode {episode} - Steps: {steps} - TWT: {total_waiting_time}")
+                    print(f"Episode {episode} - Steps: {steps} - Time Loss: {episode_info['time_loss']}")
                     break
         
         self.env.close()
