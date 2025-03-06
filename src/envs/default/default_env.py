@@ -5,7 +5,7 @@ import sys
 import io
 
 class DefaultTrafficEnv():
-    def __init__(self, config_path:str = "envs/default/sumo/env.sumocfg") -> None:
+    def __init__(self, config_path:str = "envs/sumo/env.sumocfg") -> None:
         self.config_path = config_path
         self.action_space = ((0, 1), (1, 0))
         # self.observation_space = [[-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [0.0, 30.0]]
@@ -45,7 +45,7 @@ class DefaultTrafficEnv():
             traci.load(["-c", self.config_path])
         else:
             self.sumoBinary = sumolib.checkBinary('sumo-gui' if sumo_gui else 'sumo')
-            traci.start([self.sumoBinary, "-c", self.config_path, "--tripinfo-output", "envs/default/sumo_output/sumo_log.xml"])
+            traci.start([self.sumoBinary, "-c", self.config_path, "--tripinfo-output", "envs/sumo_output/sumo_log.xml"])
         return self.get_state()
     
     def step(self, action:int) -> tuple:

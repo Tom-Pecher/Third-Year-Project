@@ -6,11 +6,11 @@ import numpy as np
 from envs.default.default_env import DefaultTrafficEnv
 
 class RandomTrafficEnv(DefaultTrafficEnv):
-    def __init__(self, config_path:str = "envs/random/sumo/env.sumocfg") -> None:
+    def __init__(self, config_path:str = "envs/sumo/env.sumocfg") -> None:
         super().__init__(config_path)
 
     def generate_routefile(self) -> None:
-        with open("envs/random/sumo/env.rou.xml", "w") as routes:
+        with open("envs/sumo/env.rou.xml", "w") as routes:
             routes.write("""<?xml version="1.0" encoding="UTF-8"?>
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <!-- Define routes -->
@@ -18,7 +18,7 @@ class RandomTrafficEnv(DefaultTrafficEnv):
     <route id="route_1" edges="E6 E1"/>
 
     <!-- Define vehicles that use the routes -->\n""")
-            departures = sorted(np.random.uniform(0, 200, 15))
+            departures = sorted(np.random.uniform(0, 200, 30))
             for i in range(len(departures)):
                 routes.write(f"""<vehicle id="{i}" route="route_{np.random.choice((0, 1))}" depart="{departures[i]}"/>\n""")
             
