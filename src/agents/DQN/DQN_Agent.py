@@ -110,7 +110,7 @@ class DQNAgent:
             
             while True:
                 action = self.select_action(state)
-                observation, reward, terminated, total_waiting_time, average_queue_length_N, average_queue_length_S = self.env.step(action)
+                observation, reward, terminated, episode_info = self.env.step(action)
                 reward = torch.tensor([reward], device=device)
                 total_reward += reward.item()
                 
@@ -130,16 +130,16 @@ class DQNAgent:
                 if terminated:
                     rewards.append(total_reward)
                     # print(f"Episode {episode} - Steps: {steps} - Epsilon: {self.eps}")
-                    print(f"Episode: {episode} - Steps: {steps} - TWT: {total_waiting_time}")
+                    print(f"Episode: {episode} - Steps: {steps} - TWT: {episode_info['total_waiting_time']}")
                     if self.wandb_on:
                         wandb.log({
                             "episode": episode, 
                             "reward": total_reward, 
                             "steps": steps, 
-                            "TWT": total_waiting_time, 
+                            "TWT": episode_info['total_waiting_time'], 
                             "rolling average": sum(rewards[-100:])/100 if len(rewards) >= 100 else None,
-                            "AQL North": average_queue_length_N,
-                            "AQL South": average_queue_length_S
+                            "AQL North": episode_info['avg_queue_E5'],
+                            "AQL South": episode_info['avg_queue_E6']
                         })
 
                     if log:
@@ -165,7 +165,7 @@ class DQNAgent:
             
             while True:
                 action = self.policy_net(state).max(1)[1].view(1, 1)
-                observation, _, terminated, total_waiting_time, _, _ = self.env.step(action.item())
+                observation, _, terminated, total_waiting_time, _ = self.env.step(action.item())
                 state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
                 
                 steps += 1

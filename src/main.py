@@ -9,7 +9,7 @@ if __name__ == "__main__":
     random_env = RandomTrafficEnv()
     sanity_env = SanityTrafficEnv()
 
-    agent1 = DQNAgent(random_env, wandb_on=True)
+    agent1 = DQNAgent(random_env, wandb_on=False)
     agent1.train(100)
 
     agent2 = DQNAgent(sanity_env, wandb_on=False)

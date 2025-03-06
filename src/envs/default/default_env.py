@@ -1,7 +1,8 @@
 
 import traci
 import sumolib
-
+import sys
+import io
 
 class DefaultTrafficEnv():
     def __init__(self, config_path:str = "envs/default/sumo/env.sumocfg") -> None:
@@ -11,8 +12,12 @@ class DefaultTrafficEnv():
         self.observation_space = [[-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0]]
         self.last_switch = 0
         self.vehicle_waiting_times = {}
+        self.emergency_brakes = 0
 
         self.queue_lengths = {'E5': [], 'E6': []} 
+
+        self.stderr_capture = io.StringIO()
+        sys.stderr = self.stderr_capture
 
     def get_state(self) -> list:
         state = [traci.vehicle.getPosition(veh_id)[1] for veh_id in traci.vehicle.getIDList() if traci.vehicle.getPosition(veh_id)[0] > -5]
@@ -25,9 +30,14 @@ class DefaultTrafficEnv():
         return state
         
     def reset(self, sumo_gui:bool=False) -> tuple:
+        self.emergency_brakes = 0
         self.last_switch = 0
         self.vehicle_waiting_times = {}
         self.queue_lengths = {'E5': [], 'E6': []}
+
+        self.stderr_capture.truncate(0)
+        self.stderr_capture.seek(0)
+
         if traci.isLoaded():
             traci.load(["-c", self.config_path])
         else:
@@ -74,12 +84,22 @@ class DefaultTrafficEnv():
                 if waiting_time > self.vehicle_waiting_times[veh_id]:
                     self.vehicle_waiting_times[veh_id] = waiting_time
 
+        self.check_emergency_brakes()
+
         total_waiting_time = sum(self.vehicle_waiting_times.values())
         avg_queues = self.get_average_queue_lengths()
 
-        return state, reward, terminated, total_waiting_time, avg_queues['E5'], avg_queues['E6']
+        episode_info = {
+            'total_waiting_time': total_waiting_time,
+            'avg_queue_E5': avg_queues['E5'],
+            'avg_queue_E6': avg_queues['E6'],
+            'emergency_brakes': self.emergency_brakes
+        }
+
+        return state, reward, terminated, episode_info
     
     def close(self) -> None:
+        sys.stderr = sys.__stderr__
         traci.close()
 
     def get_queue_length(self, edge_id:str) -> int:
@@ -96,7 +116,15 @@ class DefaultTrafficEnv():
             'E5': sum(self.queue_lengths['E5']) / len(self.queue_lengths['E5']) if self.queue_lengths['E5'] else 0,
             'E6': sum(self.queue_lengths['E6']) / len(self.queue_lengths['E6']) if self.queue_lengths['E6'] else 0
         }
-     
+    
+    def check_emergency_brakes(self) -> int:
+        """Check for emergency braking events"""
+        # Occasionally detects false positives (replace with better approach)
+        for veh_id in traci.vehicle.getIDList():
+            acceleration = traci.vehicle.getAcceleration(veh_id)
+            if acceleration <= -8:  # Threshold for emergency braking (m/s²)
+                self.emergency_brakes += 1
+    
     
 if __name__ == "__main__":
     pass
