@@ -6,8 +6,8 @@ import numpy as np
 from envs.default.default_env import DefaultTrafficEnv
 
 class RandomTrafficEnv(DefaultTrafficEnv):
-    def __init__(self, config_path:str = "envs/sumo/env.sumocfg") -> None:
-        super().__init__(config_path)
+    def __init__(self, config_path:str = "envs/sumo/env.sumocfg", state_type=0, vehicles_seen=6) -> None:
+        super().__init__(config_path, state_type, vehicles_seen)
 
     def generate_routefile(self) -> None:
         with open("envs/sumo/env.rou.xml", "w") as routes:

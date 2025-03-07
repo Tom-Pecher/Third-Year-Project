@@ -5,11 +5,12 @@ import sys
 import io
 
 class DefaultTrafficEnv():
-    def __init__(self, config_path:str = "envs/sumo/env.sumocfg") -> None:
+    def __init__(self, config_path:str = "envs/sumo/env.sumocfg", state_type=0, vehicles_seen=6) -> None:
         self.config_path = config_path
         self.action_space = ((0, 1), (1, 0))
-        # self.observation_space = [[-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [0.0, 30.0]]
-        self.observation_space = [[-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0], [-50.0, 50.0]]
+        self.state_type = state_type
+        self.vehicles_seen = vehicles_seen
+        self.observation_space = self.get_state(get_dims=True)
         self.last_switch = 0
         self.vehicle_waiting_times = {}
         self.emergency_brakes = 0
@@ -21,14 +22,27 @@ class DefaultTrafficEnv():
 
         self.time_loss = 0
 
-    def get_state(self) -> list:
-        state = [traci.vehicle.getPosition(veh_id)[1] for veh_id in traci.vehicle.getIDList() if traci.vehicle.getPosition(veh_id)[0] > -5]
-        if len(state) > 6:
-            state = state[:6]
-        else:
-            while len(state) < 6:
-                state.append(0.0)
-        # state.append(float(max(traci.simulation.getTime() - self.last_switch, 10)))
+    def get_state(self, get_dims=False) -> list:
+        match self.state_type:
+            case 0:
+                if get_dims:
+                    return [0.0 for _ in range(self.vehicles_seen)]
+                state = [traci.vehicle.getPosition(veh_id)[1] for veh_id in traci.vehicle.getIDList() if traci.vehicle.getPosition(veh_id)[0] > -5]
+                if len(state) > self.vehicles_seen:
+                    state = state[:self.vehicles_seen]
+                else:
+                    while len(state) < self.vehicles_seen:
+                        state.append(0.0)
+            case 1:
+                if get_dims:
+                    return [0.0 for _ in range(self.vehicles_seen + 1)]
+                state = [traci.vehicle.getPosition(veh_id)[1] for veh_id in traci.vehicle.getIDList() if traci.vehicle.getPosition(veh_id)[0] > -5]
+                if len(state) > self.vehicles_seen:
+                    state = state[:self.vehicles_seen]
+                else:
+                    while len(state) < self.vehicles_seen:
+                        state.append(0.0)
+                state.append(float(max(traci.simulation.getTime() - self.last_switch, 10)))
         return state
         
     def reset(self, sumo_gui:bool=False) -> tuple:

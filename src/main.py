@@ -6,10 +6,10 @@ from agents.DQN.DQN_Agent import DQNAgent
 
 if __name__ == "__main__":
     default_env = DefaultTrafficEnv()
-    random_env = RandomTrafficEnv()
+    random_env = RandomTrafficEnv(state_type=1, vehicles_seen=10)
     sanity_env = SanityTrafficEnv()
 
-    agent1 = DQNAgent(random_env, wandb_on=True)
+    agent1 = DQNAgent(random_env, wandb_on=False)
     agent1.train(1000)
 
     agent2 = DQNAgent(sanity_env, wandb_on=False)
