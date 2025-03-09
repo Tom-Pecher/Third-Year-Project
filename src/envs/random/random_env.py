@@ -18,7 +18,7 @@ class RandomTrafficEnv(DefaultTrafficEnv):
     <route id="route_1" edges="E6 E1"/>
 
     <!-- Define vehicles that use the routes -->\n""")
-            departures = sorted(np.random.uniform(0, 200, 30))
+            departures = sorted(np.random.uniform(0, 1000, 200))
             for i in range(len(departures)):
                 routes.write(f"""<vehicle id="{i}" route="route_{np.random.choice((0, 1))}" depart="{departures[i]}"/>\n""")
             
