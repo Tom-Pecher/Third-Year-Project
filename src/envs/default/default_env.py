@@ -63,7 +63,8 @@ class DefaultTrafficEnv():
         return self.get_state()
     
     def step(self, action:int) -> tuple:
-        old_signal = traci.trafficlight.getRedYellowGreenState("J4")
+        # old_signal = traci.trafficlight.getRedYellowGreenState("J4")
+        old_signal = traci.trafficlight.getRedYellowGreenState("J7")
 
         traci.simulationStep()
 
@@ -71,13 +72,16 @@ class DefaultTrafficEnv():
         self.queue_lengths['E6'].append(self.get_queue_length('E6'))
 
         if action == 1:
-            traci.trafficlight.setRedYellowGreenState("J4", "rG")
+            # traci.trafficlight.setRedYellowGreenState("J4", "rG")
+            traci.trafficlight.setRedYellowGreenState("J7", "GGrrGGrr")
         elif action == 0:
-            traci.trafficlight.setRedYellowGreenState("J4", "Gr")
+            # traci.trafficlight.setRedYellowGreenState("J4", "Gr")
+            traci.trafficlight.setRedYellowGreenState("J7", "rrGGrrGG")
         else:
             raise ValueError("Invalid action")
         
-        new_signal = traci.trafficlight.getRedYellowGreenState("J4")
+        # new_signal = traci.trafficlight.getRedYellowGreenState("J4")
+        new_signal = traci.trafficlight.getRedYellowGreenState("J7")
         if new_signal != old_signal:
             self.last_switch = traci.simulation.getTime()
             # print(self.last_switch, new_signal)

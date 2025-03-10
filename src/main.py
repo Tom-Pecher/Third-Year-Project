@@ -12,15 +12,15 @@ if __name__ == "__main__":
     random_env = RandomTrafficEnv(state_type=1, vehicles_seen=10)
     sanity_env = SanityTrafficEnv()
 
-    dqn_agent = DQNAgent(random_env, wandb_on=True)
-    dqn_agent.train(1000)
+    # dqn_agent = DQNAgent(random_env, wandb_on=True)
+    # dqn_agent.train(1000)
 
-    ddqn_agent = DDQNAgent(random_env, wandb_on=True)
-    ddqn_agent.train(1000)
+    # ddqn_agent = DDQNAgent(random_env, wandb_on=True)
+    # ddqn_agent.train(1000)
 
     dddqn_agent = DDDQNAgent(random_env, wandb_on=True)
     dddqn_agent.train(1000)
 
-    # agent2 = DQNAgent(sanity_env, wandb_on=False)
-    # agent2.load("DQN_1000.pth")
-    # agent2.run(1, sumo_gui=True)
+    agent2 = DDDQNAgent(sanity_env, wandb_on=False)
+    agent2.load("DDDQN_1000.pth")
+    agent2.run(1, sumo_gui=True)
