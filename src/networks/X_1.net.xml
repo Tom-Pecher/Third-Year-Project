@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-03-19 04:44:10 by Eclipse SUMO netedit Version 1.21.0
+<neteditConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
+
+    <input>
+        <sumocfg-file value="/home/tom/Code/AAAAAAA/1/env.sumocfg"/>
+        <additional-files value="/home/tom/Code/AAAAAAA/1/env.add.xml"/>
+        <route-files value="/home/tom/Code/AAAAAAA/1/env.rou.xml"/>
+        <sumo-net-file value="/home/tom/Code/AAAAAAA/1/env.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/tom/Code/AAAAAAA/1/env.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="0"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.50"/>
+        <rectangular-lane-cut value="0"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="0"/>
+    </pedestrian>
+
+</neteditConfiguration>
+-->
+
+<net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="-200.00,-200.00,200.00,200.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
+
+    <edge id=":TCS_0" function="internal">
+        <lane id=":TCS_0_0" index="0" speed="6.51" length="9.03" shape="-1.60,7.20 -1.95,4.75 -3.00,3.00 -4.75,1.95 -7.20,1.60"/>
+    </edge>
+    <edge id=":TCS_1" function="internal">
+        <lane id=":TCS_1_0" index="0" speed="13.89" length="14.40" shape="-1.60,7.20 -1.60,-7.20"/>
+    </edge>
+    <edge id=":TCS_2" function="internal">
+        <lane id=":TCS_2_0" index="0" speed="6.51" length="9.03" shape="7.20,1.60 4.75,1.95 3.00,3.00 1.95,4.75 1.60,7.20"/>
+    </edge>
+    <edge id=":TCS_3" function="internal">
+        <lane id=":TCS_3_0" index="0" speed="13.89" length="14.40" shape="7.20,1.60 -7.20,1.60"/>
+    </edge>
+    <edge id=":TCS_4" function="internal">
+        <lane id=":TCS_4_0" index="0" speed="6.51" length="9.03" shape="1.60,-7.20 1.95,-4.75 3.00,-3.00 4.75,-1.95 7.20,-1.60"/>
+    </edge>
+    <edge id=":TCS_5" function="internal">
+        <lane id=":TCS_5_0" index="0" speed="13.89" length="14.40" shape="1.60,-7.20 1.60,7.20"/>
+    </edge>
+    <edge id=":TCS_6" function="internal">
+        <lane id=":TCS_6_0" index="0" speed="6.51" length="9.03" shape="-7.20,-1.60 -4.75,-1.95 -3.00,-3.00 -1.95,-4.75 -1.60,-7.20"/>
+    </edge>
+    <edge id=":TCS_7" function="internal">
+        <lane id=":TCS_7_0" index="0" speed="13.89" length="14.40" shape="-7.20,-1.60 7.20,-1.60"/>
+    </edge>
+
+    <edge id="RoadEM" from="NodeE" to="TCS" priority="-1">
+        <lane id="RoadEM_0" index="0" speed="13.89" length="192.80" shape="200.00,1.60 7.20,1.60"/>
+    </edge>
+    <edge id="RoadME" from="TCS" to="NodeW" priority="-1">
+        <lane id="RoadME_0" index="0" speed="13.89" length="192.80" shape="-7.20,1.60 -200.00,1.60"/>
+    </edge>
+    <edge id="RoadMN" from="TCS" to="NodeN" priority="-1">
+        <lane id="RoadMN_0" index="0" speed="13.89" length="192.80" shape="1.60,7.20 1.60,200.00"/>
+    </edge>
+    <edge id="RoadMS" from="TCS" to="NodeS" priority="-1">
+        <lane id="RoadMS_0" index="0" speed="13.89" length="192.80" shape="-1.60,-7.20 -1.60,-200.00"/>
+    </edge>
+    <edge id="RoadMW" from="TCS" to="NodeE" priority="-1">
+        <lane id="RoadMW_0" index="0" speed="13.89" length="192.80" shape="7.20,-1.60 200.00,-1.60"/>
+    </edge>
+    <edge id="RoadNM" from="NodeN" to="TCS" priority="-1">
+        <lane id="RoadNM_0" index="0" speed="13.89" length="192.80" shape="-1.60,200.00 -1.60,7.20"/>
+    </edge>
+    <edge id="RoadSM" from="NodeS" to="TCS" priority="-1">
+        <lane id="RoadSM_0" index="0" speed="13.89" length="192.80" shape="1.60,-200.00 1.60,-7.20"/>
+    </edge>
+    <edge id="RoadWM" from="NodeW" to="TCS" priority="-1">
+        <lane id="RoadWM_0" index="0" speed="13.89" length="192.80" shape="-200.00,-1.60 -7.20,-1.60"/>
+    </edge>
+
+    <tlLogic id="TCS" type="static" programID="0" offset="0">
+        <phase duration="42" state="GGrrGGrr"/>
+        <phase duration="42" state="rrGGrrGG"/>
+    </tlLogic>
+
+    <junction id="NodeE" type="dead_end" x="200.00" y="0.00" incLanes="RoadMW_0" intLanes="" shape="200.00,0.00 200.00,-3.20 200.00,0.00"/>
+    <junction id="NodeN" type="dead_end" x="0.00" y="200.00" incLanes="RoadMN_0" intLanes="" shape="0.00,200.00 3.20,200.00 0.00,200.00"/>
+    <junction id="NodeS" type="dead_end" x="0.00" y="-200.00" incLanes="RoadMS_0" intLanes="" shape="0.00,-200.00 -3.20,-200.00 0.00,-200.00"/>
+    <junction id="NodeW" type="dead_end" x="-200.00" y="0.00" incLanes="RoadME_0" intLanes="" shape="-200.00,0.00 -200.00,3.20 -200.00,0.00"/>
+    <junction id="TCS" type="traffic_light" x="0.00" y="0.00" incLanes="RoadNM_0 RoadEM_0 RoadSM_0 RoadWM_0" intLanes=":TCS_0_0 :TCS_1_0 :TCS_2_0 :TCS_3_0 :TCS_4_0 :TCS_5_0 :TCS_6_0 :TCS_7_0" shape="-3.20,7.20 3.20,7.20 3.64,4.98 4.20,4.20 4.98,3.64 5.98,3.31 7.20,3.20 7.20,-3.20 4.98,-3.64 4.20,-4.20 3.64,-4.98 3.31,-5.98 3.20,-7.20 -3.20,-7.20 -3.64,-4.98 -4.20,-4.20 -4.98,-3.64 -5.98,-3.31 -7.20,-3.20 -7.20,3.20 -4.98,3.64 -4.20,4.20 -3.64,4.98 -3.31,5.98">
+        <request index="0" response="00000000" foes="00001000" cont="0"/>
+        <request index="1" response="00000000" foes="11001000" cont="0"/>
+        <request index="2" response="00100000" foes="00100000" cont="0"/>
+        <request index="3" response="00100011" foes="00100011" cont="0"/>
+        <request index="4" response="00000000" foes="10000000" cont="0"/>
+        <request index="5" response="00000000" foes="10001100" cont="0"/>
+        <request index="6" response="00000010" foes="00000010" cont="0"/>
+        <request index="7" response="00110010" foes="00110010" cont="0"/>
+    </junction>
+
+    <connection from="RoadEM" to="RoadMN" fromLane="0" toLane="0" via=":TCS_2_0" tl="TCS" linkIndex="2" dir="r" state="o"/>
+    <connection from="RoadEM" to="RoadME" fromLane="0" toLane="0" via=":TCS_3_0" tl="TCS" linkIndex="3" dir="s" state="o"/>
+    <connection from="RoadNM" to="RoadME" fromLane="0" toLane="0" via=":TCS_0_0" tl="TCS" linkIndex="0" dir="r" state="O"/>
+    <connection from="RoadNM" to="RoadMS" fromLane="0" toLane="0" via=":TCS_1_0" tl="TCS" linkIndex="1" dir="s" state="O"/>
+    <connection from="RoadSM" to="RoadMW" fromLane="0" toLane="0" via=":TCS_4_0" tl="TCS" linkIndex="4" dir="r" state="O"/>
+    <connection from="RoadSM" to="RoadMN" fromLane="0" toLane="0" via=":TCS_5_0" tl="TCS" linkIndex="5" dir="s" state="O"/>
+    <connection from="RoadWM" to="RoadMS" fromLane="0" toLane="0" via=":TCS_6_0" tl="TCS" linkIndex="6" dir="r" state="o"/>
+    <connection from="RoadWM" to="RoadMW" fromLane="0" toLane="0" via=":TCS_7_0" tl="TCS" linkIndex="7" dir="s" state="o"/>
+
+    <connection from=":TCS_0" to="RoadME" fromLane="0" toLane="0" dir="r" state="M"/>
+    <connection from=":TCS_1" to="RoadMS" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":TCS_2" to="RoadMN" fromLane="0" toLane="0" dir="r" state="M"/>
+    <connection from=":TCS_3" to="RoadME" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":TCS_4" to="RoadMW" fromLane="0" toLane="0" dir="r" state="M"/>
+    <connection from=":TCS_5" to="RoadMN" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":TCS_6" to="RoadMS" fromLane="0" toLane="0" dir="r" state="M"/>
+    <connection from=":TCS_7" to="RoadMW" fromLane="0" toLane="0" dir="s" state="M"/>
+
+</net>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-03-20 01:59:44 by Eclipse SUMO netedit Version 1.21.0
+<neteditConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="/home/tom/Code/TrafficRLTest/src/networks/T_1.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/tom/Code/TrafficRLTest/src/networks/T_1.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="0"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.50"/>
+        <rectangular-lane-cut value="0"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="0"/>
+    </pedestrian>
+
+</neteditConfiguration>
+-->
+
+<net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="-100.00,-100.00,0.00,100.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
+
+    <edge id=":TCS_0" function="internal">
+        <lane id=":TCS_0_0" index="0" speed="6.51" length="9.03" shape="-1.60,7.20 -1.95,4.75 -3.00,3.00 -4.75,1.95 -7.20,1.60"/>
+    </edge>
+    <edge id=":TCS_1" function="internal">
+        <lane id=":TCS_1_0" index="0" speed="7.33" length="11.73" shape="1.60,-4.00 1.05,-1.55 -0.60,0.20 -3.35,1.25 -7.20,1.60"/>
+    </edge>
+
+    <edge id="RoadMW" from="TCS" to="NodeW" priority="-1">
+        <lane id="RoadMW_0" index="0" speed="13.89" length="92.80" shape="-7.20,1.60 -100.00,1.60"/>
+    </edge>
+    <edge id="RoadNM" from="NodeN" to="TCS" priority="-1">
+        <lane id="RoadNM_0" index="0" speed="13.89" length="92.80" shape="-1.60,100.00 -1.60,7.20"/>
+    </edge>
+    <edge id="RoadSM" from="NodeS" to="TCS" priority="-1">
+        <lane id="RoadSM_0" index="0" speed="13.89" length="96.00" shape="1.60,-100.00 1.60,-4.00"/>
+    </edge>
+
+    <tlLogic id="TCS" type="static" programID="0" offset="0">
+        <phase duration="20" state="Gr"/>
+        <phase duration="20" state="rG"/>
+    </tlLogic>
+
+    <junction id="NodeN" type="dead_end" x="0.00" y="100.00" incLanes="" intLanes="" shape="0.00,100.00 -3.20,100.00"/>
+    <junction id="NodeS" type="dead_end" x="0.00" y="-100.00" incLanes="" intLanes="" shape="0.00,-100.00 3.20,-100.00"/>
+    <junction id="NodeW" type="dead_end" x="-100.00" y="0.00" incLanes="RoadMW_0" intLanes="" shape="-100.00,3.20 -100.00,0.00"/>
+    <junction id="TCS" type="traffic_light" x="0.00" y="0.00" incLanes="RoadNM_0 RoadSM_0" intLanes=":TCS_0_0 :TCS_1_0" shape="-3.20,7.20 0.00,7.20 0.24,4.75 0.83,3.00 2.37,0.20 2.96,-1.55 3.20,-4.00 0.00,-4.00 -0.80,-1.78 -1.80,-1.00 -3.20,-0.44 -5.00,-0.11 -7.20,0.00 -7.20,3.20 -4.98,3.64 -4.20,4.20 -3.64,4.98 -3.31,5.98">
+        <request index="0" response="00" foes="10" cont="0"/>
+        <request index="1" response="01" foes="01" cont="0"/>
+    </junction>
+
+    <connection from="RoadNM" to="RoadMW" fromLane="0" toLane="0" via=":TCS_0_0" tl="TCS" linkIndex="0" dir="r" state="O"/>
+    <connection from="RoadSM" to="RoadMW" fromLane="0" toLane="0" via=":TCS_1_0" tl="TCS" linkIndex="1" dir="l" state="o"/>
+
+    <connection from=":TCS_0" to="RoadMW" fromLane="0" toLane="0" dir="r" state="M"/>
+    <connection from=":TCS_1" to="RoadMW" fromLane="0" toLane="0" dir="l" state="M"/>
+
+</net>

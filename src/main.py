@@ -1,26 +1,30 @@
 
-from envs.default.default_env import DefaultTrafficEnv
-from envs.random.random_env import RandomTrafficEnv
-from envs.sanity.sanity_env import SanityTrafficEnv
+import os
+import sys
 
-from agents.DQN.DQN_Agent import DQNAgent
-from agents.DDQN.DDQN_Agent import DDQNAgent
-from agents.DDDQN.DDDQN_Agent import DDDQNAgent
+from agents.default import DefaultAgent
+from agents.fixed_duration import FixedDurationAgent
+from agents.random import RandomAgent
+from agents.dqn import DQNAgent
+from agents.ddqn import DDQNAgent
+from agents.dddqn import DDDQNAgent
+
+from envs.default import DefaultTrafficEnv
+from envs.random import RandomTrafficEnv
 
 if __name__ == "__main__":
-    default_env = DefaultTrafficEnv()
-    random_env = RandomTrafficEnv(state_type=1, vehicles_seen=10)
-    sanity_env = SanityTrafficEnv()
+    if 'SUMO_HOME' in os.environ:
+        tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
+        sys.path.append(tools)
+    else:
+        sys.exit("Please declare environment variable 'SUMO_HOME'")
 
-    # dqn_agent = DQNAgent(random_env, wandb_on=True)
-    # dqn_agent.train(1000)
 
-    # ddqn_agent = DDQNAgent(random_env, wandb_on=True)
-    # ddqn_agent.train(1000)
-
-    dddqn_agent = DDDQNAgent(random_env, wandb_on=True)
-    dddqn_agent.train(1000)
-
-    agent2 = DDDQNAgent(sanity_env, wandb_on=False)
-    agent2.load("DDDQN_1000.pth")
-    agent2.run(1, sumo_gui=True)
+    r = RandomTrafficEnv("X_3")
+    # a = DQNAgent(r, wandb_on=True)
+    # a = DDQNAgent(r, wandb_on=True)
+    a = DDDQNAgent(r, wandb_on=True)
+    # a = FixedDurationAgent(r, 100, wandb_on=True)
+    # a = RandomAgent(r, 0.5, wandb_on=True)
+    a.train(0, sumo_gui=False)
+    # a.run(1, sumo_gui=True)

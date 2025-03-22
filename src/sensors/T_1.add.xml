@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-03-20 02:02:19 by Eclipse SUMO netedit Version 1.21.0
+-->
+
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+    <!-- Detectors -->
+    <laneAreaDetector id="DetNM_0" lane="RoadNM_0" pos="40.30" length="52.50" period="300.00" file="e2_1.xml"/>
+    <laneAreaDetector id="DetSM_0" lane="RoadSM_0" pos="43.50" length="52.50" period="300.00" file="e2_0.xml"/>
+</additional>
