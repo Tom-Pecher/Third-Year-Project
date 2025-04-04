@@ -65,10 +65,13 @@ class DQNAgent:
         self.steps_done = 0
         
         
-    def select_action(self, state:torch.Tensor) -> torch.Tensor:
-        self.eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
+    def select_action(self, state:torch.Tensor, egreedy=True) -> torch.Tensor:
+        if egreedy:
+            self.eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
+        else:
+            self.eps = 0
         self.steps_done += 1
-        if random.random() > self.eps:
+        if random.random() >= self.eps:
             with torch.no_grad():
                 output = self.policy_net(state).argmax(1).unsqueeze(0)
                 return output
@@ -103,7 +106,7 @@ class DQNAgent:
     def train(self, num_episodes:int=100, sumo_gui=False) -> None:
         rewards = []
         for episode in range(num_episodes + 1):
-            log = (episode % 100 == 0)
+            log = (episode % 10 == 0)
             state = self.env.reset(sumo_gui)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             steps = 0
@@ -156,20 +159,36 @@ class DQNAgent:
         self.policy_net.load_state_dict(torch.load(Path(path) / filename, weights_only=True))
 
     def run(self, num_episodes:int=10, sumo_gui=False) -> None:
+        rewards = []
         for episode in range(num_episodes):
             state = self.env.reset(sumo_gui)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             steps = 0
+            total_reward = 0
             
             while True:
-                action = self.policy_net(state).max(1)[1].view(1, 1)
-                observation, _, terminated, episode_info = self.env.step(action.item())
+                action = self.select_action(state)
+                observation, reward, terminated, env_info = self.env.step(action)
+                reward = torch.tensor([reward], device=device)
+                total_reward += reward.item()
+                
                 state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
+
+                # Log metrics:
+                if self.wandb_on:
+                    wandb.log({
+                        "episode": episode,
+                        "step": traci.simulation.getTime(),
+                        **env_info
+                    })
                 
                 steps += 1
                 if terminated:
+                    rewards.append(total_reward)
                     print(f"Episode {episode} - COMPLETED")
                     break
-        
+                
         self.env.close()
+        if self.wandb_on:
+            wandb.finish()
         

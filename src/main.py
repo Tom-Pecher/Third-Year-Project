@@ -11,6 +11,7 @@ from agents.dddqn import DDDQNAgent
 
 from envs.default import DefaultTrafficEnv
 from envs.random import RandomTrafficEnv
+from envs.sanity import SanityTrafficEnv
 
 if __name__ == "__main__":
     if 'SUMO_HOME' in os.environ:
@@ -19,12 +20,14 @@ if __name__ == "__main__":
     else:
         sys.exit("Please declare environment variable 'SUMO_HOME'")
 
-
     r = RandomTrafficEnv("X_3")
-    # a = DQNAgent(r, wandb_on=True)
-    # a = DDQNAgent(r, wandb_on=True)
-    a = DDDQNAgent(r, wandb_on=True)
-    # a = FixedDurationAgent(r, 100, wandb_on=True)
-    # a = RandomAgent(r, 0.5, wandb_on=True)
-    a.train(0, sumo_gui=False)
-    # a.run(1, sumo_gui=True)
+    # r = SanityTrafficEnv("X_3")
+
+    a = DQNAgent(r, wandb_on=False)
+    # a = DDQNAgent(r, wandb_on=False)
+    # a = DDDQNAgent(r, wandb_on=False)
+    # a = FixedDurationAgent(r, 100, wandb_on=False)
+    # a = RandomAgent(r, 0.5, wandb_on=False)
+
+    # a.train(10, sumo_gui=False)
+    a.run(1, sumo_gui=False)

@@ -37,6 +37,10 @@ class DefaultTrafficEnv():
                 self.data_filename = f"saved/data/{self.network_path.split('/')[-1].split('.')[0]}({self.version}).csv"
             with open(self.data_filename, "x") as f:
                 f.write(",".join(self.get_episode_info().keys()) + '\n')
+
+        self.last_action_step = 0
+        self.action_step = 0
+        self.state_changed = False
         
     # Load the desired road network into the SUMO directory:
     def load_network(self) -> None:
@@ -93,6 +97,8 @@ class DefaultTrafficEnv():
     # Reset/start the simulation:
     def reset(self, sumo_gui:bool=False) -> tuple:
         self.vehicles = []
+        self.last_action_step = 0
+        self.action_step = 0
         
         if traci.isLoaded():
             traci.load(["-c", self.config_path])
@@ -104,22 +110,44 @@ class DefaultTrafficEnv():
         phases = [phase.phases for phase in logics][0]
         self.phases = [phase.state for phase in phases]
 
-        self.observation_space = [0.0 for _ in traci.lanearea.getIDList()]
+        # self.observation_space = [0.0 for _ in traci.lanearea.getIDList()] + [0.0] + [0.0]
+        self.observation_space = [0.0]
         self.action_space = range(len(self.phases))
 
         return self.get_state()
     
     # Advance the simulation by one step:
-    def step(self, action:int) -> tuple:
+    def step(self, action:int, yellows:bool=True) -> tuple:
+        self.state_changed = False
     
         if action is not None:
-            traci.trafficlight.setRedYellowGreenState("TCS", self.phases[action])
+            if type(action) is not int:
+                action = int(action)
+            current_phase = traci.trafficlight.getRedYellowGreenState("TCS")
+            if self.phases[action] != current_phase:
+                print(f"CHANGING PHASE from {current_phase} to {self.phases[action]}")
+                self.state_changed = True
+                self.last_action_step = self.action_step
+                self.action_step = traci.simulation.getTime()
+                if yellows:
+                    current_phase = current_phase.replace("G", "y").replace("g", "y")
+                    traci.trafficlight.setRedYellowGreenState("TCS", current_phase)
+                    for _ in range(3):
+                        traci.simulationStep()
+                    next_phase = self.phases[action].replace("G", "y").replace("g", "y")
+                    traci.trafficlight.setRedYellowGreenState("TCS", next_phase)
+                    for _ in range(3):
+                        traci.simulationStep()
+
+                traci.trafficlight.setRedYellowGreenState("TCS", self.phases[action])
 
         traci.simulationStep()
         
         state = self.get_state()
-        reward = -sum([traci.lanearea.getLastStepVehicleNumber(detector_id) for detector_id in traci.lanearea.getIDList()])
+        reward = self.get_reward()
         terminated = traci.simulation.getMinExpectedNumber() <= 0
+
+        print(f"Time:{traci.simulation.getTime()}, State: {state}, Action: {action}, Reward:{reward}")
 
         self.update_vehicles()
         env_info = self.get_env_info()
@@ -139,12 +167,31 @@ class DefaultTrafficEnv():
         return [traci.lanearea.getLastStepVehicleNumber(detector_id) for detector_id in traci.lanearea.getIDList()]
     
     # Get the current state of the simulation:
-    def get_state(self) -> tuple:
-        return self.get_queues() 
+    def get_state(self, type:int=1) -> tuple:
+        # queues = [min(queue, 5) for queue in self.get_queues()]
+        action_time_diff = min(traci.simulation.getTime() - self.last_action_step, 50)
+        # current_phase = self.phases.index(traci.trafficlight.getRedYellowGreenState("TCS"))
+        # return queues + [action_time_diff] + [current_phase]
+        return [action_time_diff]
+        
     
     # Get the current reward of the simulation:
     def get_reward(self) -> float:
-        return -sum(max(self.get_queues(), 200))
+        queues = [min(queue**2, 50) for queue in self.get_queues()]
+        # waiting_times = [min(vehicle.waiting_time, 125)**2 for vehicle in self.vehicles if vehicle.in_simulation]
+
+        action_time_diff = traci.simulation.getTime() - self.last_action_step
+        time_last_action = 0
+        # print(traci.simulation.getTime(), self.action_step, self.last_action_step)
+        DELAY = 13
+        C = 50
+        DROPOFF = 2.5
+        if self.state_changed:
+            # time_last_action = C if action_time_diff < DELAY else min(C/(action_time_diff - DELAY + 1), C)
+            time_last_action = min(C, max(0, C - DROPOFF * (action_time_diff - DELAY)))
+
+        # return -sum(queues) - time_last_action
+        return -time_last_action
 
     # Update the vehicles in the simulation:
     def update_vehicles(self) -> None:

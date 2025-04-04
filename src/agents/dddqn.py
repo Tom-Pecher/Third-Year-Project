@@ -14,19 +14,21 @@ from utils.duelling_neural_network import DuellingNN
 from utils.replay_memory import ReplayMemory
 from utils.transition import Transition
 
+from agents.default import DefaultAgent
+
 warnings.filterwarnings("ignore", category=DeprecationWarning, message="`np.bool8` is a deprecated alias for `np.bool_`")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class DDDQNAgent:
+class DDDQNAgent(DefaultAgent):
     def __init__(self, env,
-                    batch_size:int  = 128,
+                    batch_size:int  = 256,
                     gamma:float     = 0.99,
                     eps_start:float = 0.9,
                     eps_end:float   = 0.05,
                     eps_decay:int   = 10000,
-                    tau:float       = 0.005,
-                    lr:float        = 1e-4,
+                    tau:float       = 0.5,
+                    lr:float        = 1e-5,
                     wandb_on:bool   = False
                 ) -> None:
         
@@ -55,18 +57,20 @@ class DDDQNAgent:
         self.env.reset()
         n_observations = len(self.env.observation_space)
         n_actions = len(self.env.action_space)
+        traci.close()
         
         self.policy_net = DuellingNN(n_observations, n_actions).to(device)
         self.target_net = DuellingNN(n_observations, n_actions).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.lr, amsgrad=True)
-        self.memory = ReplayMemory(100000)
+        self.memory = ReplayMemory(10000)
         self.steps_done = 0
         
         
     def select_action(self, state:torch.Tensor) -> torch.Tensor:
         self.eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
+        # print(self.eps)
         self.steps_done += 1
         if random.random() > self.eps:
             with torch.no_grad():
@@ -93,7 +97,7 @@ class DDDQNAgent:
             next_actions = self.policy_net(non_final_next_states).max(1)[1].unsqueeze(1)
             next_state_values[non_final_mask] = self.target_net(non_final_next_states).gather(1, next_actions).squeeze(1)
 
-        expected_state_action_values = (next_state_values * self.gamma) + reward_batch
+        expected_state_action_values = reward_batch + (next_state_values * self.gamma * non_final_mask.float())
         
         loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
         self.optimizer.zero_grad()
@@ -111,6 +115,7 @@ class DDDQNAgent:
             total_reward = 0
             
             while True:
+                self.lr = 1e-4 * self.eps
                 action = self.select_action(state)
                 observation, reward, terminated, env_info = self.env.step(action)
                 reward = torch.tensor([reward], device=device)
@@ -133,6 +138,9 @@ class DDDQNAgent:
                     wandb.log({
                         "episode": episode,
                         "step": traci.simulation.getTime(),
+                        "eps": self.eps,
+                        "lr": self.lr,
+                        "reward": reward,
                         **env_info
                     })
                 
@@ -164,7 +172,7 @@ class DDDQNAgent:
             
             while True:
                 action = self.policy_net(state).max(1)[1].view(1, 1)
-                observation, _, terminated, episode_info = self.env.step(action.item())
+                observation, _, terminated, episode_info = self.env.step(action)
                 state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
                 
                 steps += 1
