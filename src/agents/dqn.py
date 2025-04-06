@@ -14,19 +14,21 @@ from utils.neural_network import NN
 from utils.replay_memory import ReplayMemory
 from utils.transition import Transition
 
+from agents.default import DefaultAgent
+
 warnings.filterwarnings("ignore", category=DeprecationWarning, message="`np.bool8` is a deprecated alias for `np.bool_`")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class DQNAgent:
+class DQNAgent(DefaultAgent):
     def __init__(self, env,
                     batch_size:int  = 128,
                     gamma:float     = 0.99,
                     eps_start:float = 0.9,
                     eps_end:float   = 0.05,
                     eps_decay:int   = 10000,
-                    tau:float       = 0.005,
-                    lr:float        = 1e-4,
+                    tau:float       = 0.5,
+                    lr:float        = 1e-5,
                     wandb_on:bool   = False
                 ) -> None:
         
@@ -42,7 +44,7 @@ class DQNAgent:
         self.wandb_on   = wandb_on
 
         if wandb_on:
-            wandb.init(project="DQN-Training", config={
+            wandb.init(project="DQN-Results", config={
                 "batch_size" : batch_size,
                 "gamma"      : gamma,
                 "eps_start"  : eps_start,
@@ -55,13 +57,14 @@ class DQNAgent:
         self.env.reset()
         n_observations = len(self.env.observation_space)
         n_actions = len(self.env.action_space)
+        traci.close()
         
         self.policy_net = NN(n_observations, n_actions).to(device)
         self.target_net = NN(n_observations, n_actions).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.lr, amsgrad=True)
-        self.memory = ReplayMemory(100000)
+        self.memory = ReplayMemory(10000)
         self.steps_done = 0
         
         
@@ -113,6 +116,8 @@ class DQNAgent:
             total_reward = 0
             
             while True:
+                self.lr = 1e-4 * self.eps
+
                 action = self.select_action(state)
                 observation, reward, terminated, env_info = self.env.step(action)
                 reward = torch.tensor([reward], device=device)
@@ -135,6 +140,9 @@ class DQNAgent:
                     wandb.log({
                         "episode": episode,
                         "step": traci.simulation.getTime(),
+                        "eps": self.eps,
+                        "lr": self.lr,
+                        "reward": reward,
                         **env_info
                     })
                 
@@ -164,31 +172,15 @@ class DQNAgent:
             state = self.env.reset(sumo_gui)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             steps = 0
-            total_reward = 0
             
             while True:
-                action = self.select_action(state)
-                observation, reward, terminated, env_info = self.env.step(action)
-                reward = torch.tensor([reward], device=device)
-                total_reward += reward.item()
-                
+                action = self.select_action(state, egreedy=False)
+                observation, _, terminated, episode_info = self.env.step(action)
                 state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
 
-                # Log metrics:
-                if self.wandb_on:
-                    wandb.log({
-                        "episode": episode,
-                        "step": traci.simulation.getTime(),
-                        **env_info
-                    })
-                
                 steps += 1
                 if terminated:
-                    rewards.append(total_reward)
                     print(f"Episode {episode} - COMPLETED")
                     break
                 
         self.env.close()
-        if self.wandb_on:
-            wandb.finish()
-        

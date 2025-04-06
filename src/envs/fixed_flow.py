@@ -7,7 +7,7 @@ from envs.default import DefaultTrafficEnv
 from utils.vehicle import Vehicle
 
 # The random environment produces vehicles for random routes at random intervals:
-class RandomTrafficEnv(DefaultTrafficEnv):
+class FixedFlowTrafficEnv(DefaultTrafficEnv):
     def __init__(self, simulation_name:str, state_type:int=0, save_data:bool=False) -> None:
         super().__init__(simulation_name, state_type, save_data)
 
@@ -17,9 +17,4 @@ class RandomTrafficEnv(DefaultTrafficEnv):
         with open(f"routes/{self.simulation_name}.rou.xml", "r") as f:
             contents = f.read()
         with open("sumo/env.rou.xml", "w") as f:
-            for line in contents.split('\n'):
-                if not line.startswith('<flow id'):
-                    f.write(line + '\n')
-                    continue
-                flow_data = line.split('vehsPerHour')[0] + 'probability="0.027" departLane="random" departSpeed="random"/>'
-                f.write(flow_data + '\n')
+            f.write(contents)

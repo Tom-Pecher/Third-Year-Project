@@ -10,9 +10,10 @@ from utils.vehicle import Vehicle
 
 # The default environment produces vehicles for each possible route at 10 second intervals.
 class DefaultTrafficEnv():
-    def __init__(self, simulation_name:str, save_data:bool=False) -> None:
+    def __init__(self, simulation_name:str, state_type:int=0, save_data:bool=False) -> None:
 
         self.simulation_name = simulation_name
+        self.state_type = state_type
 
         # Obtain the path to the src directory:
         self.src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -111,10 +112,10 @@ class DefaultTrafficEnv():
         self.phases = [phase.state for phase in phases]
 
         # self.observation_space = [0.0 for _ in traci.lanearea.getIDList()] + [0.0] + [0.0]
-        self.observation_space = [0.0]
+        self.observation_space = [0.0 for _ in range(len(self.get_state(return_empty=True)))]
         self.action_space = range(len(self.phases))
 
-        return self.get_state()
+        return self.get_state(return_empty=True)
     
     # Advance the simulation by one step:
     def step(self, action:int, yellows:bool=True) -> tuple:
@@ -143,11 +144,11 @@ class DefaultTrafficEnv():
 
         traci.simulationStep()
         
-        state = self.get_state()
+        state = self.get_state(action=action)
         reward = self.get_reward()
         terminated = traci.simulation.getMinExpectedNumber() <= 0
 
-        print(f"Time:{traci.simulation.getTime()}, State: {state}, Action: {action}, Reward:{reward}")
+        print(f"Time:{traci.simulation.getTime()}, State: {state}, Action: {action}, Reward: {reward}")
 
         self.update_vehicles()
         env_info = self.get_env_info()
@@ -167,18 +168,36 @@ class DefaultTrafficEnv():
         return [traci.lanearea.getLastStepVehicleNumber(detector_id) for detector_id in traci.lanearea.getIDList()]
     
     # Get the current state of the simulation:
-    def get_state(self, type:int=1) -> tuple:
+    def get_state(self, action=None, return_empty=False) -> tuple:
         # queues = [min(queue, 5) for queue in self.get_queues()]
-        action_time_diff = min(traci.simulation.getTime() - self.last_action_step, 50)
+        
         # current_phase = self.phases.index(traci.trafficlight.getRedYellowGreenState("TCS"))
         # return queues + [action_time_diff] + [current_phase]
-        return [action_time_diff]
-        
+
+        if return_empty:
+            action_time_diff = 0.0
+            action = 0.0
+        else:
+            action_time_diff = min(traci.simulation.getTime() - self.last_action_step, 50)
+            if action is None:
+                raise Exception("Action is None")
+            action = float(action)
+
+        match self.state_type:
+            case 0:
+                return [action_time_diff]
+            case 1:
+                return [action, action_time_diff]
+            case 2:
+                return [action, action_time_diff] + self.get_queues()
+            case _:
+                raise Exception("Invalid state type")
+
     
     # Get the current reward of the simulation:
     def get_reward(self) -> float:
-        queues = [min(queue**2, 50) for queue in self.get_queues()]
-        # waiting_times = [min(vehicle.waiting_time, 125)**2 for vehicle in self.vehicles if vehicle.in_simulation]
+        # queues = [min(queue**2, 50) for queue in self.get_queues()]
+        waiting_times = [min(vehicle.waiting_time, 10) for vehicle in self.vehicles if vehicle.in_simulation]
 
         action_time_diff = traci.simulation.getTime() - self.last_action_step
         time_last_action = 0
@@ -190,14 +209,14 @@ class DefaultTrafficEnv():
             # time_last_action = C if action_time_diff < DELAY else min(C/(action_time_diff - DELAY + 1), C)
             time_last_action = min(C, max(0, C - DROPOFF * (action_time_diff - DELAY)))
 
-        # return -sum(queues) - time_last_action
-        return -time_last_action
+        w = sum(waiting_times)/10
+        reward = sum(waiting_times) + 2*time_last_action**1.5
+        return -reward
 
     # Update the vehicles in the simulation:
     def update_vehicles(self) -> None:
         for v in traci.vehicle.getIDList():
-            v_num = int(float(v.split('.')[-1]))
-            if v_num >= len(self.vehicles):
+            if v not in [veh.id for veh in self.vehicles]:
                 vehicle = Vehicle(v)
                 self.vehicles.append(vehicle)
         

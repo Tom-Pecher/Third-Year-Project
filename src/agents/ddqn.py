@@ -14,19 +14,21 @@ from utils.neural_network import NN
 from utils.replay_memory import ReplayMemory
 from utils.transition import Transition
 
+from agents.default import DefaultAgent
+
 warnings.filterwarnings("ignore", category=DeprecationWarning, message="`np.bool8` is a deprecated alias for `np.bool_`")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class DDQNAgent:
+class DDQNAgent(DefaultAgent):
     def __init__(self, env,
                     batch_size:int  = 128,
                     gamma:float     = 0.99,
                     eps_start:float = 0.9,
                     eps_end:float   = 0.05,
                     eps_decay:int   = 10000,
-                    tau:float       = 0.005,
-                    lr:float        = 1e-4,
+                    tau:float       = 0.5,
+                    lr:float        = 1e-5,
                     wandb_on:bool   = False
                 ) -> None:
         
@@ -42,7 +44,7 @@ class DDQNAgent:
         self.wandb_on   = wandb_on
 
         if wandb_on:
-            wandb.init(project="DDQN-Training", config={
+            wandb.init(project="DDQN-Results", config={
                 "batch_size" : batch_size,
                 "gamma"      : gamma,
                 "eps_start"  : eps_start,
@@ -55,20 +57,24 @@ class DDQNAgent:
         self.env.reset()
         n_observations = len(self.env.observation_space)
         n_actions = len(self.env.action_space)
+        traci.close()
         
         self.policy_net = NN(n_observations, n_actions).to(device)
         self.target_net = NN(n_observations, n_actions).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.lr, amsgrad=True)
-        self.memory = ReplayMemory(100000)
+        self.memory = ReplayMemory(10000)
         self.steps_done = 0
         
         
-    def select_action(self, state:torch.Tensor) -> torch.Tensor:
-        self.eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
+    def select_action(self, state:torch.Tensor, egreedy=True) -> torch.Tensor:
+        if egreedy:
+            self.eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
+        else:
+            self.eps = 0
         self.steps_done += 1
-        if random.random() > self.eps:
+        if random.random() >= self.eps:
             with torch.no_grad():
                 output = self.policy_net(state).argmax(1).unsqueeze(0)
                 return output
@@ -104,13 +110,15 @@ class DDQNAgent:
     def train(self, num_episodes:int=100, sumo_gui=False) -> None:
         rewards = []
         for episode in range(num_episodes + 1):
-            log = (episode % 100 == 0)
+            log = (episode % 10 == 0)
             state = self.env.reset(sumo_gui)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             steps = 0
             total_reward = 0
             
             while True:
+                self.lr = 1e-4 * self.eps
+
                 action = self.select_action(state)
                 observation, reward, terminated, env_info = self.env.step(action)
                 reward = torch.tensor([reward], device=device)
@@ -133,6 +141,9 @@ class DDQNAgent:
                     wandb.log({
                         "episode": episode,
                         "step": traci.simulation.getTime(),
+                        "eps": self.eps,
+                        "lr": self.lr,
+                        "reward": reward,
                         **env_info
                     })
                 
@@ -163,8 +174,8 @@ class DDQNAgent:
             steps = 0
             
             while True:
-                action = self.policy_net(state).max(1)[1].view(1, 1)
-                observation, _, terminated, episode_info = self.env.step(action.item())
+                action = self.select_action(state, egreedy=False)
+                observation, _, terminated, episode_info = self.env.step(action)
                 state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
                 
                 steps += 1

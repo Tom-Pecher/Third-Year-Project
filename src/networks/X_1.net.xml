@@ -90,8 +90,15 @@
     </edge>
 
     <tlLogic id="TCS" type="static" programID="0" offset="0">
+
         <phase duration="42" state="GGrrGGrr"/>
         <phase duration="42" state="rrGGrrGG"/>
+<!-- 
+        <phase duration="42" state="GGrrrrrr"/>
+        <phase duration="42" state="rrGGrrrr"/>
+        <phase duration="42" state="rrrrGGrr"/>
+        <phase duration="42" state="rrrrrrGG"/>
+         -->
     </tlLogic>
 
     <junction id="NodeE" type="dead_end" x="200.00" y="0.00" incLanes="RoadMW_0" intLanes="" shape="200.00,0.00 200.00,-3.20 200.00,0.00"/>
