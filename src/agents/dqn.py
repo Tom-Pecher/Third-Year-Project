@@ -69,7 +69,7 @@ class DQNAgent(DefaultAgent):
         
         
     def select_action(self, state:torch.Tensor, egreedy=True) -> torch.Tensor:
-        # print("POLICY NET: ", self.policy_net(state))
+        print("POLICY NET: ", self.policy_net(state))
         if egreedy:
             self.eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
         else:
@@ -77,8 +77,7 @@ class DQNAgent(DefaultAgent):
         self.steps_done += 1
         if random.random() >= self.eps:
             with torch.no_grad():
-                output = self.policy_net(state).argmax(1).unsqueeze(0)
-                return output
+                return self.policy_net(state).max(1)[1].view(1, 1)
         return torch.tensor([[random.choice((0, 1))]], device=device, dtype=torch.long)
     
     def optimize(self) -> None:
@@ -174,7 +173,7 @@ class DQNAgent(DefaultAgent):
             steps = 0
             
             while True:
-                action = self.select_action(state, egreedy=False)
+                action = self.policy_net(state).max(1)[1].view(1, 1)
                 observation, _, terminated, episode_info = self.env.step(action)
                 state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
 

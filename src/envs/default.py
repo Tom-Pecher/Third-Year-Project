@@ -5,6 +5,7 @@ import traci
 import sumolib
 import os
 import xml.etree.ElementTree as ET
+import math
 
 from utils.vehicle import Vehicle
 
@@ -191,6 +192,8 @@ class DefaultTrafficEnv():
                 return [action, action_time_diff]
             case 2:
                 return [action, action_time_diff] + self.get_queues()
+            case 3:
+                return self.get_queues()
             case _:
                 raise Exception("Invalid state type")
 
@@ -214,15 +217,29 @@ class DefaultTrafficEnv():
 
         match self.reward_type:
             case 0:
-                reward = 2*time_last_action**1.5
+                reward = -sum(waiting_times)
             case 1:
-                reward = 2*time_last_action**1.5
+                reward = -2*time_last_action**1.5
             case 2:
-                reward = sum(waiting_times) + 2*time_last_action**1.5
+                reward = -(sum(waiting_times) + 2*time_last_action**1.5)
+            case 3:
+                reward = 20*action_time_diff**2 / ((action_time_diff - 40)**2 + 100) - 200 if action_time_diff < 40 else -1000
+            case 4:
+                if self.state_changed:
+                    reward = -100 if action_time_diff < 30 else 400
+                    # print("STATE CHANGED", action_time_diff, reward)
+                else:
+                    reward = 0 if action_time_diff < 30 else -500
+                    # print("STATE NOT CHANGED", time_last_action, reward)
+            case 5:
+                if self.state_changed:
+                    reward = -100 * math.tanh((action_time_diff - 40)/10)
+                else:
+                    reward = -(action_time_diff - 20) * (action_time_diff + 20) / 4
             case _:
                 raise Exception("Invalid state type")
 
-        return -reward
+        return reward
 
     # Update the vehicles in the simulation:
     def update_vehicles(self) -> None:

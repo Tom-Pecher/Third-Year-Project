@@ -5,3 +5,4 @@ base_requirements.txt
 test.py
 test2.py
 test3.py
+src/agents/test_dqn.py
