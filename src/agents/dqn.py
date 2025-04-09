@@ -21,18 +21,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class DQNAgent(DefaultAgent):
-    def __init__(self, env,
+    def __init__(self, env, project_name="DQN-Results",
                     batch_size:int  = 128,
                     gamma:float     = 0.99,
                     eps_start:float = 0.9,
                     eps_end:float   = 0.05,
                     eps_decay:int   = 10000,
-                    tau:float       = 0.5,
+                    tau:float       = 0.05,
                     lr:float        = 1e-5,
                     wandb_on:bool   = False
                 ) -> None:
         
         self.env        = env
+        self.project_name = project_name
         self.batch_size = batch_size
         self.gamma      = gamma
         self.eps_start  = eps_start
@@ -44,7 +45,7 @@ class DQNAgent(DefaultAgent):
         self.wandb_on   = wandb_on
 
         if wandb_on:
-            wandb.init(project="DQN-Results", config={
+            wandb.init(project=self.project_name, config={
                 "batch_size" : batch_size,
                 "gamma"      : gamma,
                 "eps_start"  : eps_start,
@@ -57,7 +58,6 @@ class DQNAgent(DefaultAgent):
         self.env.reset()
         n_observations = len(self.env.observation_space)
         n_actions = len(self.env.action_space)
-        traci.close()
         
         self.policy_net = NN(n_observations, n_actions).to(device)
         self.target_net = NN(n_observations, n_actions).to(device)
@@ -69,6 +69,7 @@ class DQNAgent(DefaultAgent):
         
         
     def select_action(self, state:torch.Tensor, egreedy=True) -> torch.Tensor:
+        # print("POLICY NET: ", self.policy_net(state))
         if egreedy:
             self.eps = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
         else:
@@ -167,7 +168,6 @@ class DQNAgent(DefaultAgent):
         self.policy_net.load_state_dict(torch.load(Path(path) / filename, weights_only=True))
 
     def run(self, num_episodes:int=10, sumo_gui=False) -> None:
-        rewards = []
         for episode in range(num_episodes):
             state = self.env.reset(sumo_gui)
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)

@@ -10,10 +10,11 @@ from utils.vehicle import Vehicle
 
 # The default environment produces vehicles for each possible route at 10 second intervals.
 class DefaultTrafficEnv():
-    def __init__(self, simulation_name:str, state_type:int=0, save_data:bool=False) -> None:
+    def __init__(self, simulation_name:str, state_type:int=0, reward_type:int=0, save_data:bool=False) -> None:
 
         self.simulation_name = simulation_name
         self.state_type = state_type
+        self.reward_type = reward_type
 
         # Obtain the path to the src directory:
         self.src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -112,7 +113,7 @@ class DefaultTrafficEnv():
         self.phases = [phase.state for phase in phases]
 
         # self.observation_space = [0.0 for _ in traci.lanearea.getIDList()] + [0.0] + [0.0]
-        self.observation_space = [0.0 for _ in range(len(self.get_state(return_empty=True)))]
+        self.observation_space = self.get_state(return_empty=True)
         self.action_space = range(len(self.phases))
 
         return self.get_state(return_empty=True)
@@ -209,8 +210,18 @@ class DefaultTrafficEnv():
             # time_last_action = C if action_time_diff < DELAY else min(C/(action_time_diff - DELAY + 1), C)
             time_last_action = min(C, max(0, C - DROPOFF * (action_time_diff - DELAY)))
 
-        w = sum(waiting_times)/10
-        reward = sum(waiting_times) + 2*time_last_action**1.5
+        # reward = sum(waiting_times) + 2*time_last_action**1.5
+
+        match self.reward_type:
+            case 0:
+                reward = 2*time_last_action**1.5
+            case 1:
+                reward = 2*time_last_action**1.5
+            case 2:
+                reward = sum(waiting_times) + 2*time_last_action**1.5
+            case _:
+                raise Exception("Invalid state type")
+
         return -reward
 
     # Update the vehicles in the simulation:
