@@ -6,3 +6,4 @@ test.py
 test2.py
 test3.py
 src/agents/test_dqn.py
+src/agents/old_dqn.py

@@ -132,16 +132,6 @@ class DefaultTrafficEnv():
                 self.state_changed = True
                 self.last_action_step = self.action_step
                 self.action_step = traci.simulation.getTime()
-                if yellows:
-                    current_phase = current_phase.replace("G", "y").replace("g", "y")
-                    traci.trafficlight.setRedYellowGreenState("TCS", current_phase)
-                    for _ in range(3):
-                        traci.simulationStep()
-                    next_phase = self.phases[action].replace("G", "y").replace("g", "y")
-                    traci.trafficlight.setRedYellowGreenState("TCS", next_phase)
-                    for _ in range(3):
-                        traci.simulationStep()
-
                 traci.trafficlight.setRedYellowGreenState("TCS", self.phases[action])
 
         traci.simulationStep()
