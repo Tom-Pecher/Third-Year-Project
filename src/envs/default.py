@@ -262,7 +262,7 @@ class DefaultTrafficEnv():
             "active_vehicles"    : len(active_vehicles),
             "throughput"         : len(traci.simulation.getArrivedIDList()),
             "gross_waiting_time" : sum([vehicle.waiting_time for vehicle in active_vehicles]),
-            "n_emergency_brakes" : sum([vehicle.emergency_brakes for vehicle in active_vehicles]),
+            "n_severe_brakes" : sum([vehicle.severe_brakes for vehicle in active_vehicles]),
             "gross_time_loss"    : sum([vehicle.time_loss for vehicle in active_vehicles]),
         }
     
@@ -270,7 +270,7 @@ class DefaultTrafficEnv():
     def get_episode_info(self) -> dict:
         return {
             "cumulative_waiting_time": sum([vehicle.cumulative_waiting_time for vehicle in self.vehicles]),
-            "n_emergency_brakes": sum([vehicle.emergency_brakes for vehicle in self.vehicles]),
+            "n_severe_brakes": sum([vehicle.severe_brakes for vehicle in self.vehicles]),
             "cumulative_time_loss": sum([vehicle.cumulative_time_loss for vehicle in self.vehicles]),
         }
 

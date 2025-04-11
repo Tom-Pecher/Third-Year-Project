@@ -9,7 +9,7 @@ class Vehicle:
         self.pos = 0
         self.speed = 0
         self.waiting_time = 0
-        self.emergency_brakes = 0
+        self.severe_brakes = 0
         self.time_loss = 0
         self.cumulative_time_loss = 0
 
@@ -32,8 +32,8 @@ class Vehicle:
         self.time_loss = traci.vehicle.getTimeLoss(self.id) - self.last_cumulative_time_loss
         self.last_cumulative_time_loss = traci.vehicle.getTimeLoss(self.id)
 
-        if traci.vehicle.getAcceleration(self.id) <= -8:
-            self.emergency_brakes += 1
+        if traci.vehicle.getAcceleration(self.id) <= -4.5:
+            self.severe_brakes += 1
 
         # Update cumulative values:
         if self.last_waiting_time != 0 and self.waiting_time == 0:

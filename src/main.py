@@ -22,10 +22,10 @@ if __name__ == "__main__":
     else:
         sys.exit("Please declare environment variable 'SUMO_HOME'")
 
-    r = RandomTrafficEnv("X_3", state_type=3, reward_type=0)
+    # r = RandomTrafficEnv("X_3", state_type=3, reward_type=0)
     # r = SanityTrafficEnv("X_3", state_type=2)
 
-    a = Test_DQNAgent(r)
+    # a = Test_DQNAgent(r)
     # a = DQNAgent(r, wandb_on=False)
     # a = DDQNAgent(r, wandb_on=False)
     # a = DDDQNAgent(r, wandb_on=True)
@@ -33,7 +33,14 @@ if __name__ == "__main__":
     # a = RandomAgent(r, 0.5, wandb_on=False)
 
     # a.train(1, sumo_gui=False)
-    a.run(1, sumo_gui=True)
+    # a.run(1, sumo_gui=True)
 
     # a.load("DDDQN_20.pth")
     # a.train(1, sumo_gui=True)
+        
+    r = RandomTrafficEnv("X_3")
+    a = None
+
+    for i in range(0, 61, 5):
+        a = FixedDurationAgent(r, i, wandb_on=False)
+        a.run(1, sumo_gui=False, id=i)
