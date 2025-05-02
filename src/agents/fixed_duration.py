@@ -25,56 +25,28 @@ class FixedDurationAgent(DefaultAgent):
 
     # The agent runs the environment for a specified number of episodes:
     def run(self, num_episodes:int=1, sumo_gui:bool=True, id=None) -> None:
-        # for episode in range(num_episodes):
-        #     self.env.reset(sumo_gui)
-        #     while True:
-        #         if self.duration == 0:
-        #             action = self.select_action()
-        #         elif traci.simulation.getTime() % self.duration == 0:
-        #             action = self.select_action()
-        #         else:
-        #             action = self.phase
-        #         _, _, terminated, env_info = self.env.step(action)
+        for episode in range(num_episodes):
+            self.env.reset(sumo_gui)
+            while True:
+                if self.duration == 0:
+                    action = self.select_action()
+                elif traci.simulation.getTime() % self.duration == 0:
+                    action = self.select_action()
+                else:
+                    action = self.phase
+                _, _, terminated, env_info = self.env.step(action)
 
-        #         if self.wandb_on:
-        #             wandb.log({
-        #                 "episode": episode,
-        #                 "step": traci.simulation.getTime(),
-        #                 "phase": action,
-        #                 **env_info
-        #             })
+                if self.wandb_on:
+                    wandb.log({
+                        "episode": episode,
+                        "step": traci.simulation.getTime(),
+                        "phase": action,
+                        **env_info
+                    })
 
-        #         if terminated:
-        #             print(f"Episode {episode} - COMPLETE")
-        #             break
-
-        with open(f"saved/data/fixed_d_{id}.csv", "w") as f:
-            headers = ("episode", "step", "phase", "active_vehicles", "throughput", "gross_waiting_time", "severe_brakes", "gross_time_loss")
-            f.write(", ".join(headers) + "\n")
-            for episode in range(num_episodes):
-                self.env.reset(sumo_gui)
-                while True:
-                    if self.duration == 0:
-                        action = self.select_action()
-                    elif traci.simulation.getTime() % self.duration == 0:
-                        action = self.select_action()
-                    else:
-                        action = self.phase
-                    _, _, terminated, env_info = self.env.step(action)
-
-                    if self.wandb_on:
-                        wandb.log({
-                            "episode": episode,
-                            "step": traci.simulation.getTime(),
-                            "phase": action,
-                            **env_info
-                        })
-
-                    f.write(", ".join(map(str, [episode, traci.simulation.getTime(), action] + list(env_info.values()))) + "\n")
-
-                    if terminated:
-                        print(f"Episode {episode} - COMPLETE")
-                        break
+                if terminated:
+                    print(f"Episode {episode} - COMPLETE")
+                    break
         
         self.env.close()
         if self.wandb_on:
