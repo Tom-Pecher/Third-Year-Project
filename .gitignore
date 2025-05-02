@@ -2,5 +2,4 @@ venv/
 __pycache__/
 wandb/
 base_requirements.txt
-src/saved/data/*
 src/sumo/*
