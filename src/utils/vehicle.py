@@ -32,7 +32,7 @@ class Vehicle:
         self.time_loss = traci.vehicle.getTimeLoss(self.id) - self.last_cumulative_time_loss
         self.last_cumulative_time_loss = traci.vehicle.getTimeLoss(self.id)
 
-        if traci.vehicle.getAcceleration(self.id) <= -4.5:
+        if traci.vehicle.getAcceleration(self.id) <= -6:
             self.severe_brakes += 1
 
         # Update cumulative values:

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-04-29 04:28:25 by Eclipse SUMO netedit Version 1.21.0
+-->
+
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+    <!-- Detectors -->
+    <laneAreaDetector id="DetEM_0" lane="RoadEM_0" pos="113" length="50" period="300.00" file="DetEM_0.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_1" lane="RoadEM_1" pos="113" length="50" period="300.00" file="DetEM_1.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_2" lane="RoadEM_2" pos="113" length="50" period="300.00" file="DetEM_2.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_3" lane="RoadEM_3" pos="113" length="50" period="300.00" file="DetEM_3.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_4" lane="RoadEM_4" pos="113" length="50" period="300.00" file="DetEM_4.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_5" lane="RoadEM_5" pos="113" length="50" period="300.00" file="DetEM_5.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_6" lane="RoadEM_6" pos="113" length="50" period="300.00" file="DetEM_6.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_7" lane="RoadEM_7" pos="113" length="50" period="300.00" file="DetEM_7.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_8" lane="RoadEM_8" pos="113" length="50" period="300.00" file="DetEM_8.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetEM_9" lane="RoadEM_9" pos="113" length="50" period="300.00" file="DetEM_9.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_0" lane="RoadNM_0" pos="113" length="50" period="300.00" file="DetNM_0.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_1" lane="RoadNM_1" pos="113" length="50" period="300.00" file="DetNM_1.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_2" lane="RoadNM_2" pos="113" length="50" period="300.00" file="DetNM_2.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_3" lane="RoadNM_3" pos="113" length="50" period="300.00" file="DetNM_3.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_4" lane="RoadNM_4" pos="113" length="50" period="300.00" file="DetNM_4.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_5" lane="RoadNM_5" pos="113" length="50" period="300.00" file="DetNM_5.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_6" lane="RoadNM_6" pos="113" length="50" period="300.00" file="DetNM_6.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_7" lane="RoadNM_7" pos="113" length="50" period="300.00" file="DetNM_7.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_8" lane="RoadNM_8" pos="113" length="50" period="300.00" file="DetNM_8.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetNM_9" lane="RoadNM_9" pos="113" length="50" period="300.00" file="DetNM_9.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_0" lane="RoadSM_0" pos="113" length="50" period="300.00" file="DetSM_0.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_1" lane="RoadSM_1" pos="113" length="50" period="300.00" file="DetSM_1.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_2" lane="RoadSM_2" pos="113" length="50" period="300.00" file="DetSM_2.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_3" lane="RoadSM_3" pos="113" length="50" period="300.00" file="DetSM_3.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_4" lane="RoadSM_4" pos="113" length="50" period="300.00" file="DetSM_4.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_5" lane="RoadSM_5" pos="113" length="50" period="300.00" file="DetSM_5.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_6" lane="RoadSM_6" pos="113" length="50" period="300.00" file="DetSM_6.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_7" lane="RoadSM_7" pos="113" length="50" period="300.00" file="DetSM_7.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_8" lane="RoadSM_8" pos="113" length="50" period="300.00" file="DetSM_8.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetSM_9" lane="RoadSM_9" pos="113" length="50" period="300.00" file="DetSM_9.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_0" lane="RoadWM_0" pos="113" length="50" period="300.00" file="DetWM_0.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_1" lane="RoadWM_1" pos="113" length="50" period="300.00" file="DetWM_1.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_2" lane="RoadWM_2" pos="113" length="50" period="300.00" file="DetWM_2.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_3" lane="RoadWM_3" pos="113" length="50" period="300.00" file="DetWM_3.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_4" lane="RoadWM_4" pos="113" length="50" period="300.00" file="DetWM_4.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_5" lane="RoadWM_5" pos="113" length="50" period="300.00" file="DetWM_5.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_6" lane="RoadWM_6" pos="113" length="50" period="300.00" file="DetWM_6.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_7" lane="RoadWM_7" pos="113" length="50" period="300.00" file="DetWM_7.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_8" lane="RoadWM_8" pos="113" length="50" period="300.00" file="DetWM_8.xml" friendlyPos="1"/>
+    <laneAreaDetector id="DetWM_9" lane="RoadWM_9" pos="113" length="50" period="300.00" file="DetWM_9.xml" friendlyPos="1"/>
+</additional>

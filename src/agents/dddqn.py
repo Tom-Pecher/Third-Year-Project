@@ -22,11 +22,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class DDDQNAgent(DefaultAgent):
     def __init__(self, env, project_name="DDDQN-Results",
-                    batch_size:int  = 256,
+                    batch_size:int  = 128,
                     gamma:float     = 0.99,
                     eps_start:float = 0.9,
                     eps_end:float   = 0.05,
-                    eps_decay:int   = 10000,
+                    eps_decay:int   = 1500,
                     tau:float       = 0.5,
                     lr:float        = 1e-5,
                     wandb_on:bool   = False

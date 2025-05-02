@@ -58,6 +58,7 @@ class DQNAgent(DefaultAgent):
         self.env.reset()
         n_observations = len(self.env.observation_space)
         n_actions = len(self.env.action_space)
+        traci.close()
         
         self.policy_net = NN(n_observations, n_actions).to(device)
         self.target_net = NN(n_observations, n_actions).to(device)

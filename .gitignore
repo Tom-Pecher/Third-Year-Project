@@ -2,8 +2,5 @@ venv/
 __pycache__/
 wandb/
 base_requirements.txt
-test.py
-test2.py
-test3.py
-src/agents/test_dqn.py
-src/agents/old_dqn.py
+src/saved/data/*
+src/sumo/*
