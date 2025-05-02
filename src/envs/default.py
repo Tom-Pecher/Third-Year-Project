@@ -113,7 +113,6 @@ class DefaultTrafficEnv():
         phases = [phase.phases for phase in logics][0]
         self.phases = [phase.state for phase in phases]
 
-        # self.observation_space = [0.0 for _ in traci.lanearea.getIDList()] + [0.0] + [0.0]
         self.observation_space = self.get_state(return_empty=True)
         self.action_space = range(len(self.phases))
 
@@ -179,32 +178,6 @@ class DefaultTrafficEnv():
         return distances
     
     # Get the current state of the simulation:
-    # def get_state(self, action=None, return_empty=False) -> tuple:
-    #     # queues = [min(queue, 5) for queue in self.get_queues()]
-        
-    #     # current_phase = self.phases.index(traci.trafficlight.getRedYellowGreenState("TCS"))
-    #     # return queues + [action_time_diff] + [current_phase]
-
-    #     if return_empty:
-    #         action_time_diff = 0.0
-    #         action = 0.0
-    #     else:
-    #         action_time_diff = min(traci.simulation.getTime() - self.last_action_step, 50)
-    #         if action is None:
-    #             raise Exception("Action is None")
-    #         action = float(action)
-
-    #     match self.state_type:
-    #         case 0:
-    #             return [action_time_diff]
-    #         case 1:
-    #             return [action, action_time_diff]
-    #         case 2:
-    #             return [action, action_time_diff] + self.get_queues()
-    #         case 3:
-    #             return self.get_queues()
-    #         case _:
-    #             raise Exception("Invalid state type")
     def get_state(self, action=None, return_empty=False) -> tuple:
         if return_empty:
             length = 0
@@ -237,47 +210,6 @@ class DefaultTrafficEnv():
 
     
     # Get the current reward of the simulation:
-    # def get_reward(self) -> float:
-    #     # queues = [min(queue**2, 50) for queue in self.get_queues()]
-    #     waiting_times = [min(vehicle.waiting_time, 10) for vehicle in self.vehicles if vehicle.in_simulation]
-
-    #     action_time_diff = traci.simulation.getTime() - self.last_action_step
-    #     time_last_action = 0
-    #     # print(traci.simulation.getTime(), self.action_step, self.last_action_step)
-    #     DELAY = 13
-    #     C = 50
-    #     DROPOFF = 2.5
-    #     if self.state_changed:
-    #         # time_last_action = C if action_time_diff < DELAY else min(C/(action_time_diff - DELAY + 1), C)
-    #         time_last_action = min(C, max(0, C - DROPOFF * (action_time_diff - DELAY)))
-
-    #     # reward = sum(waiting_times) + 2*time_last_action**1.5
-
-    #     match self.reward_type:
-    #         case 0:
-    #             reward = -sum(waiting_times)
-    #         case 1:
-    #             reward = -2*time_last_action**1.5
-    #         case 2:
-    #             reward = -(sum(waiting_times) + 2*time_last_action**1.5)
-    #         case 3:
-    #             reward = 20*action_time_diff**2 / ((action_time_diff - 40)**2 + 100) - 200 if action_time_diff < 40 else -1000
-    #         case 4:
-    #             if self.state_changed:
-    #                 reward = -100 if action_time_diff < 30 else 400
-    #                 # print("STATE CHANGED", action_time_diff, reward)
-    #             else:
-    #                 reward = 0 if action_time_diff < 30 else -500
-    #                 # print("STATE NOT CHANGED", time_last_action, reward)
-    #         case 5:
-    #             if self.state_changed:
-    #                 reward = 100 * math.tanh((action_time_diff - 40)/10)
-    #             else:
-    #                 reward = -80 * math.tanh((action_time_diff - 40)/10) - 20
-    #         case _:
-    #             raise Exception("Invalid state type")
-
-    #     return reward
     def get_reward(self) -> float:
         reward = 0
         if self.state_type[0] == "1":
